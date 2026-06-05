@@ -1,0 +1,18 @@
+test:
+  name: e-spill-harsh-intensity
+  description: Harsh intensity test - higher GC pressure (1500 tx/s, 20 minutes, 200 slots/tx)
+  workers:
+    type: local
+    number: 30
+  rounds:
+    - label: harsh-intensity-bloat
+      txDuration: 1200  # 20 minutes
+      rateControl:
+        type: fixed-load
+        opts:
+          transactionLoad: 1500
+      workload:
+        module: benchmarks/stateBloat.js
+        arguments:
+          slotsPerTx: 200
+          contractId: StateBloater

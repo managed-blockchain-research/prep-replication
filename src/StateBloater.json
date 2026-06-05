@@ -1,0 +1,75 @@
+{
+  "contractName": "StateBloater",
+  "abi": [
+    {
+      "anonymous": false,
+      "inputs": [
+        {
+          "indexed": false,
+          "internalType": "uint256",
+          "name": "startIdx",
+          "type": "uint256"
+        },
+        {
+          "indexed": false,
+          "internalType": "uint256",
+          "name": "count",
+          "type": "uint256"
+        }
+      ],
+      "name": "Bloated",
+      "type": "event"
+    },
+    {
+      "inputs": [
+        {
+          "internalType": "uint256",
+          "name": "startIdx",
+          "type": "uint256"
+        },
+        {
+          "internalType": "uint256",
+          "name": "count",
+          "type": "uint256"
+        }
+      ],
+      "name": "bloat",
+      "outputs": [],
+      "stateMutability": "nonpayable",
+      "type": "function"
+    },
+    {
+      "inputs": [
+        {
+          "internalType": "uint256",
+          "name": "",
+          "type": "uint256"
+        }
+      ],
+      "name": "heavyStorage",
+      "outputs": [
+        {
+          "internalType": "uint256",
+          "name": "",
+          "type": "uint256"
+        }
+      ],
+      "stateMutability": "view",
+      "type": "function"
+    },
+    {
+      "inputs": [
+        {
+          "internalType": "bytes",
+          "name": "",
+          "type": "bytes"
+        }
+      ],
+      "name": "sink",
+      "outputs": [],
+      "stateMutability": "nonpayable",
+      "type": "function"
+    }
+  ],
+  "bytecode": "0x608060405234801561001057600080fd5b50610244806100206000396000f3fe608060405234801561001057600080fd5b50600436106100415760003560e01c806310f963d41461004657806394a3249014610078578063a49cb33b1461008d575b600080fd5b610066610054366004610119565b60006020819052908152604090205481565b60405190815260200160405180910390f35b61008b610086366004610132565b61009f565b005b61008b61009b366004610154565b5050565b60006100ab82846101dc565b9050825b818110156100da576000818152602081905260409020819055806100d2816101f5565b9150506100af565b5060408051848152602081018490527f4579110cef76cff0db2f6670bfbf135767d3797865ef946a33e0c0ddab2ba766910160405180910390a1505050565b60006020828403121561012b57600080fd5b5035919050565b6000806040838503121561014557600080fd5b50508035926020909101359150565b6000806020838503121561016757600080fd5b823567ffffffffffffffff8082111561017f57600080fd5b818501915085601f83011261019357600080fd5b8135818111156101a257600080fd5b8660208285010111156101b457600080fd5b60209290920196919550909350505050565b634e487b7160e01b600052601160045260246000fd5b808201808211156101ef576101ef6101c6565b92915050565b600060018201610207576102076101c6565b506001019056fea26469706673582212207c89b6a306b8aeff5d60c84749c76d0b9011899b4d2963956cc248c44e0579be64736f6c63430008130033"
+}

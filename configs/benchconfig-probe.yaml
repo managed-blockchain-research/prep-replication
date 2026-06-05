@@ -1,0 +1,19 @@
+test:
+  name: last-probe
+  description: 30s smoke test to verify LAST-AL multi-contract grouping.
+  workers:
+    type: local
+    number: 30
+  rounds:
+    - label: probe
+      txDuration: 30
+      rateControl:
+        type: fixed-rate
+        opts:
+          tps: 1500
+      workload:
+        module: benchmarks/stateBloat.js
+        arguments:
+          slotsPerTx: 200
+          numContracts: 30
+          contractPrefix: SB

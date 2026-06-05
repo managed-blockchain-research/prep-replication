@@ -1,0 +1,84 @@
+{
+  "caliper": {
+    "blockchain": "ethereum"
+  },
+  "ethereum": {
+    "url": "ws://localhost:8546",
+    "chainId": 1337,
+    "contractDeployerAddress": "0x7E5F4552091A69125d5DfCb7b8C2659029395Bdf",
+    "fromAddress": "0x7E5F4552091A69125d5DfCb7b8C2659029395Bdf",
+    "fromAddressSeed": null,
+    "contracts": {
+      "StateBloater": {
+        "address": "0xF2E246BB76DF876Cef8b38ae84130F4F55De395b",
+        "abi": [
+          {
+            "anonymous": false,
+            "inputs": [
+              {
+                "indexed": false,
+                "internalType": "uint256",
+                "name": "startIdx",
+                "type": "uint256"
+              },
+              {
+                "indexed": false,
+                "internalType": "uint256",
+                "name": "count",
+                "type": "uint256"
+              }
+            ],
+            "name": "Bloated",
+            "type": "event"
+          },
+          {
+            "inputs": [
+              {
+                "internalType": "uint256",
+                "name": "startIdx",
+                "type": "uint256"
+              },
+              {
+                "internalType": "uint256",
+                "name": "count",
+                "type": "uint256"
+              }
+            ],
+            "name": "bloat",
+            "outputs": [],
+            "stateMutability": "nonpayable",
+            "type": "function"
+          },
+          {
+            "inputs": [
+              {
+                "internalType": "uint256",
+                "name": "",
+                "type": "uint256"
+              }
+            ],
+            "name": "heavyStorage",
+            "outputs": [
+              {
+                "internalType": "uint256",
+                "name": "",
+                "type": "uint256"
+              }
+            ],
+            "stateMutability": "view",
+            "type": "function"
+          }
+        ],
+        "gas": {
+          "gasLimit": 8000000
+        }
+      }
+    },
+    "transactionOptions": {
+      "gas": 8000000,
+      "gasPrice": "0"
+    },
+    "contractDeployerAddressPrivateKey": "0x0000000000000000000000000000000000000000000000000000000000000001",
+    "fromAddressPrivateKey": "0x0000000000000000000000000000000000000000000000000000000000000001"
+  }
+}

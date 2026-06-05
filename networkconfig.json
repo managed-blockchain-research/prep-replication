@@ -1,0 +1,2334 @@
+{
+  "caliper": {
+    "blockchain": "ethereum"
+  },
+  "ethereum": {
+    "url": "ws://localhost:8546",
+    "contractDeployerAddress": "0xBE0cf996DE312b11990E4BcbBf7Fc156880AcFC8",
+    "fromAddressSeed": "deadbeefdeadbeefdeadbeefdeadbeefdeadbeefdeadbeefdeadbeefdeadbeef",
+    "contracts": {
+      "SB0": {
+        "address": "0xe688F795c179B4B1ac92BB8236B15d590E4DbF12",
+        "abi": [
+          {
+            "anonymous": false,
+            "inputs": [
+              {
+                "indexed": false,
+                "internalType": "uint256",
+                "name": "startIdx",
+                "type": "uint256"
+              },
+              {
+                "indexed": false,
+                "internalType": "uint256",
+                "name": "count",
+                "type": "uint256"
+              }
+            ],
+            "name": "Bloated",
+            "type": "event"
+          },
+          {
+            "inputs": [
+              {
+                "internalType": "uint256",
+                "name": "startIdx",
+                "type": "uint256"
+              },
+              {
+                "internalType": "uint256",
+                "name": "count",
+                "type": "uint256"
+              }
+            ],
+            "name": "bloat",
+            "outputs": [],
+            "stateMutability": "nonpayable",
+            "type": "function"
+          },
+          {
+            "inputs": [
+              {
+                "internalType": "uint256",
+                "name": "",
+                "type": "uint256"
+              }
+            ],
+            "name": "heavyStorage",
+            "outputs": [
+              {
+                "internalType": "uint256",
+                "name": "",
+                "type": "uint256"
+              }
+            ],
+            "stateMutability": "view",
+            "type": "function"
+          },
+          {
+            "inputs": [
+              {
+                "internalType": "bytes",
+                "name": "",
+                "type": "bytes"
+              }
+            ],
+            "name": "sink",
+            "outputs": [],
+            "stateMutability": "nonpayable",
+            "type": "function"
+          }
+        ],
+        "gas": {
+          "gasLimit": 8000000
+        }
+      },
+      "SB1": {
+        "address": "0xd0cc304ad62a1d5537472e0D3eEAe81B3Fb64b46",
+        "abi": [
+          {
+            "anonymous": false,
+            "inputs": [
+              {
+                "indexed": false,
+                "internalType": "uint256",
+                "name": "startIdx",
+                "type": "uint256"
+              },
+              {
+                "indexed": false,
+                "internalType": "uint256",
+                "name": "count",
+                "type": "uint256"
+              }
+            ],
+            "name": "Bloated",
+            "type": "event"
+          },
+          {
+            "inputs": [
+              {
+                "internalType": "uint256",
+                "name": "startIdx",
+                "type": "uint256"
+              },
+              {
+                "internalType": "uint256",
+                "name": "count",
+                "type": "uint256"
+              }
+            ],
+            "name": "bloat",
+            "outputs": [],
+            "stateMutability": "nonpayable",
+            "type": "function"
+          },
+          {
+            "inputs": [
+              {
+                "internalType": "uint256",
+                "name": "",
+                "type": "uint256"
+              }
+            ],
+            "name": "heavyStorage",
+            "outputs": [
+              {
+                "internalType": "uint256",
+                "name": "",
+                "type": "uint256"
+              }
+            ],
+            "stateMutability": "view",
+            "type": "function"
+          },
+          {
+            "inputs": [
+              {
+                "internalType": "bytes",
+                "name": "",
+                "type": "bytes"
+              }
+            ],
+            "name": "sink",
+            "outputs": [],
+            "stateMutability": "nonpayable",
+            "type": "function"
+          }
+        ],
+        "gas": {
+          "gasLimit": 8000000
+        }
+      },
+      "SB2": {
+        "address": "0xE5F29D232EB39934d07979d112ed65a172C9a1d3",
+        "abi": [
+          {
+            "anonymous": false,
+            "inputs": [
+              {
+                "indexed": false,
+                "internalType": "uint256",
+                "name": "startIdx",
+                "type": "uint256"
+              },
+              {
+                "indexed": false,
+                "internalType": "uint256",
+                "name": "count",
+                "type": "uint256"
+              }
+            ],
+            "name": "Bloated",
+            "type": "event"
+          },
+          {
+            "inputs": [
+              {
+                "internalType": "uint256",
+                "name": "startIdx",
+                "type": "uint256"
+              },
+              {
+                "internalType": "uint256",
+                "name": "count",
+                "type": "uint256"
+              }
+            ],
+            "name": "bloat",
+            "outputs": [],
+            "stateMutability": "nonpayable",
+            "type": "function"
+          },
+          {
+            "inputs": [
+              {
+                "internalType": "uint256",
+                "name": "",
+                "type": "uint256"
+              }
+            ],
+            "name": "heavyStorage",
+            "outputs": [
+              {
+                "internalType": "uint256",
+                "name": "",
+                "type": "uint256"
+              }
+            ],
+            "stateMutability": "view",
+            "type": "function"
+          },
+          {
+            "inputs": [
+              {
+                "internalType": "bytes",
+                "name": "",
+                "type": "bytes"
+              }
+            ],
+            "name": "sink",
+            "outputs": [],
+            "stateMutability": "nonpayable",
+            "type": "function"
+          }
+        ],
+        "gas": {
+          "gasLimit": 8000000
+        }
+      },
+      "SB3": {
+        "address": "0x9e9f6957F9117B5ed5072B6274415dc47e7649D3",
+        "abi": [
+          {
+            "anonymous": false,
+            "inputs": [
+              {
+                "indexed": false,
+                "internalType": "uint256",
+                "name": "startIdx",
+                "type": "uint256"
+              },
+              {
+                "indexed": false,
+                "internalType": "uint256",
+                "name": "count",
+                "type": "uint256"
+              }
+            ],
+            "name": "Bloated",
+            "type": "event"
+          },
+          {
+            "inputs": [
+              {
+                "internalType": "uint256",
+                "name": "startIdx",
+                "type": "uint256"
+              },
+              {
+                "internalType": "uint256",
+                "name": "count",
+                "type": "uint256"
+              }
+            ],
+            "name": "bloat",
+            "outputs": [],
+            "stateMutability": "nonpayable",
+            "type": "function"
+          },
+          {
+            "inputs": [
+              {
+                "internalType": "uint256",
+                "name": "",
+                "type": "uint256"
+              }
+            ],
+            "name": "heavyStorage",
+            "outputs": [
+              {
+                "internalType": "uint256",
+                "name": "",
+                "type": "uint256"
+              }
+            ],
+            "stateMutability": "view",
+            "type": "function"
+          },
+          {
+            "inputs": [
+              {
+                "internalType": "bytes",
+                "name": "",
+                "type": "bytes"
+              }
+            ],
+            "name": "sink",
+            "outputs": [],
+            "stateMutability": "nonpayable",
+            "type": "function"
+          }
+        ],
+        "gas": {
+          "gasLimit": 8000000
+        }
+      },
+      "SB4": {
+        "address": "0xB4A5c7Ec0846977D321239Abb43f1D421b0F92e4",
+        "abi": [
+          {
+            "anonymous": false,
+            "inputs": [
+              {
+                "indexed": false,
+                "internalType": "uint256",
+                "name": "startIdx",
+                "type": "uint256"
+              },
+              {
+                "indexed": false,
+                "internalType": "uint256",
+                "name": "count",
+                "type": "uint256"
+              }
+            ],
+            "name": "Bloated",
+            "type": "event"
+          },
+          {
+            "inputs": [
+              {
+                "internalType": "uint256",
+                "name": "startIdx",
+                "type": "uint256"
+              },
+              {
+                "internalType": "uint256",
+                "name": "count",
+                "type": "uint256"
+              }
+            ],
+            "name": "bloat",
+            "outputs": [],
+            "stateMutability": "nonpayable",
+            "type": "function"
+          },
+          {
+            "inputs": [
+              {
+                "internalType": "uint256",
+                "name": "",
+                "type": "uint256"
+              }
+            ],
+            "name": "heavyStorage",
+            "outputs": [
+              {
+                "internalType": "uint256",
+                "name": "",
+                "type": "uint256"
+              }
+            ],
+            "stateMutability": "view",
+            "type": "function"
+          },
+          {
+            "inputs": [
+              {
+                "internalType": "bytes",
+                "name": "",
+                "type": "bytes"
+              }
+            ],
+            "name": "sink",
+            "outputs": [],
+            "stateMutability": "nonpayable",
+            "type": "function"
+          }
+        ],
+        "gas": {
+          "gasLimit": 8000000
+        }
+      },
+      "SB5": {
+        "address": "0x8fFdDCa566B4c376aD1075E7681A7B8CD02e0EEE",
+        "abi": [
+          {
+            "anonymous": false,
+            "inputs": [
+              {
+                "indexed": false,
+                "internalType": "uint256",
+                "name": "startIdx",
+                "type": "uint256"
+              },
+              {
+                "indexed": false,
+                "internalType": "uint256",
+                "name": "count",
+                "type": "uint256"
+              }
+            ],
+            "name": "Bloated",
+            "type": "event"
+          },
+          {
+            "inputs": [
+              {
+                "internalType": "uint256",
+                "name": "startIdx",
+                "type": "uint256"
+              },
+              {
+                "internalType": "uint256",
+                "name": "count",
+                "type": "uint256"
+              }
+            ],
+            "name": "bloat",
+            "outputs": [],
+            "stateMutability": "nonpayable",
+            "type": "function"
+          },
+          {
+            "inputs": [
+              {
+                "internalType": "uint256",
+                "name": "",
+                "type": "uint256"
+              }
+            ],
+            "name": "heavyStorage",
+            "outputs": [
+              {
+                "internalType": "uint256",
+                "name": "",
+                "type": "uint256"
+              }
+            ],
+            "stateMutability": "view",
+            "type": "function"
+          },
+          {
+            "inputs": [
+              {
+                "internalType": "bytes",
+                "name": "",
+                "type": "bytes"
+              }
+            ],
+            "name": "sink",
+            "outputs": [],
+            "stateMutability": "nonpayable",
+            "type": "function"
+          }
+        ],
+        "gas": {
+          "gasLimit": 8000000
+        }
+      },
+      "SB6": {
+        "address": "0x5E0396Bb8b34AB4313A21d4C724741E9831a1F97",
+        "abi": [
+          {
+            "anonymous": false,
+            "inputs": [
+              {
+                "indexed": false,
+                "internalType": "uint256",
+                "name": "startIdx",
+                "type": "uint256"
+              },
+              {
+                "indexed": false,
+                "internalType": "uint256",
+                "name": "count",
+                "type": "uint256"
+              }
+            ],
+            "name": "Bloated",
+            "type": "event"
+          },
+          {
+            "inputs": [
+              {
+                "internalType": "uint256",
+                "name": "startIdx",
+                "type": "uint256"
+              },
+              {
+                "internalType": "uint256",
+                "name": "count",
+                "type": "uint256"
+              }
+            ],
+            "name": "bloat",
+            "outputs": [],
+            "stateMutability": "nonpayable",
+            "type": "function"
+          },
+          {
+            "inputs": [
+              {
+                "internalType": "uint256",
+                "name": "",
+                "type": "uint256"
+              }
+            ],
+            "name": "heavyStorage",
+            "outputs": [
+              {
+                "internalType": "uint256",
+                "name": "",
+                "type": "uint256"
+              }
+            ],
+            "stateMutability": "view",
+            "type": "function"
+          },
+          {
+            "inputs": [
+              {
+                "internalType": "bytes",
+                "name": "",
+                "type": "bytes"
+              }
+            ],
+            "name": "sink",
+            "outputs": [],
+            "stateMutability": "nonpayable",
+            "type": "function"
+          }
+        ],
+        "gas": {
+          "gasLimit": 8000000
+        }
+      },
+      "SB7": {
+        "address": "0x94E12BD69A567EF80Fc22F9c3F7C65aCD61E1C93",
+        "abi": [
+          {
+            "anonymous": false,
+            "inputs": [
+              {
+                "indexed": false,
+                "internalType": "uint256",
+                "name": "startIdx",
+                "type": "uint256"
+              },
+              {
+                "indexed": false,
+                "internalType": "uint256",
+                "name": "count",
+                "type": "uint256"
+              }
+            ],
+            "name": "Bloated",
+            "type": "event"
+          },
+          {
+            "inputs": [
+              {
+                "internalType": "uint256",
+                "name": "startIdx",
+                "type": "uint256"
+              },
+              {
+                "internalType": "uint256",
+                "name": "count",
+                "type": "uint256"
+              }
+            ],
+            "name": "bloat",
+            "outputs": [],
+            "stateMutability": "nonpayable",
+            "type": "function"
+          },
+          {
+            "inputs": [
+              {
+                "internalType": "uint256",
+                "name": "",
+                "type": "uint256"
+              }
+            ],
+            "name": "heavyStorage",
+            "outputs": [
+              {
+                "internalType": "uint256",
+                "name": "",
+                "type": "uint256"
+              }
+            ],
+            "stateMutability": "view",
+            "type": "function"
+          },
+          {
+            "inputs": [
+              {
+                "internalType": "bytes",
+                "name": "",
+                "type": "bytes"
+              }
+            ],
+            "name": "sink",
+            "outputs": [],
+            "stateMutability": "nonpayable",
+            "type": "function"
+          }
+        ],
+        "gas": {
+          "gasLimit": 8000000
+        }
+      },
+      "SB8": {
+        "address": "0x56dE8D62fd54474579F6daEf6aa7A5E735f63448",
+        "abi": [
+          {
+            "anonymous": false,
+            "inputs": [
+              {
+                "indexed": false,
+                "internalType": "uint256",
+                "name": "startIdx",
+                "type": "uint256"
+              },
+              {
+                "indexed": false,
+                "internalType": "uint256",
+                "name": "count",
+                "type": "uint256"
+              }
+            ],
+            "name": "Bloated",
+            "type": "event"
+          },
+          {
+            "inputs": [
+              {
+                "internalType": "uint256",
+                "name": "startIdx",
+                "type": "uint256"
+              },
+              {
+                "internalType": "uint256",
+                "name": "count",
+                "type": "uint256"
+              }
+            ],
+            "name": "bloat",
+            "outputs": [],
+            "stateMutability": "nonpayable",
+            "type": "function"
+          },
+          {
+            "inputs": [
+              {
+                "internalType": "uint256",
+                "name": "",
+                "type": "uint256"
+              }
+            ],
+            "name": "heavyStorage",
+            "outputs": [
+              {
+                "internalType": "uint256",
+                "name": "",
+                "type": "uint256"
+              }
+            ],
+            "stateMutability": "view",
+            "type": "function"
+          },
+          {
+            "inputs": [
+              {
+                "internalType": "bytes",
+                "name": "",
+                "type": "bytes"
+              }
+            ],
+            "name": "sink",
+            "outputs": [],
+            "stateMutability": "nonpayable",
+            "type": "function"
+          }
+        ],
+        "gas": {
+          "gasLimit": 8000000
+        }
+      },
+      "SB9": {
+        "address": "0x9f38f28Be7058d99C1eb5975B247ED692aB58109",
+        "abi": [
+          {
+            "anonymous": false,
+            "inputs": [
+              {
+                "indexed": false,
+                "internalType": "uint256",
+                "name": "startIdx",
+                "type": "uint256"
+              },
+              {
+                "indexed": false,
+                "internalType": "uint256",
+                "name": "count",
+                "type": "uint256"
+              }
+            ],
+            "name": "Bloated",
+            "type": "event"
+          },
+          {
+            "inputs": [
+              {
+                "internalType": "uint256",
+                "name": "startIdx",
+                "type": "uint256"
+              },
+              {
+                "internalType": "uint256",
+                "name": "count",
+                "type": "uint256"
+              }
+            ],
+            "name": "bloat",
+            "outputs": [],
+            "stateMutability": "nonpayable",
+            "type": "function"
+          },
+          {
+            "inputs": [
+              {
+                "internalType": "uint256",
+                "name": "",
+                "type": "uint256"
+              }
+            ],
+            "name": "heavyStorage",
+            "outputs": [
+              {
+                "internalType": "uint256",
+                "name": "",
+                "type": "uint256"
+              }
+            ],
+            "stateMutability": "view",
+            "type": "function"
+          },
+          {
+            "inputs": [
+              {
+                "internalType": "bytes",
+                "name": "",
+                "type": "bytes"
+              }
+            ],
+            "name": "sink",
+            "outputs": [],
+            "stateMutability": "nonpayable",
+            "type": "function"
+          }
+        ],
+        "gas": {
+          "gasLimit": 8000000
+        }
+      },
+      "SB10": {
+        "address": "0xBF63CdF83bB3a41933019594fF7A63A84852ffD5",
+        "abi": [
+          {
+            "anonymous": false,
+            "inputs": [
+              {
+                "indexed": false,
+                "internalType": "uint256",
+                "name": "startIdx",
+                "type": "uint256"
+              },
+              {
+                "indexed": false,
+                "internalType": "uint256",
+                "name": "count",
+                "type": "uint256"
+              }
+            ],
+            "name": "Bloated",
+            "type": "event"
+          },
+          {
+            "inputs": [
+              {
+                "internalType": "uint256",
+                "name": "startIdx",
+                "type": "uint256"
+              },
+              {
+                "internalType": "uint256",
+                "name": "count",
+                "type": "uint256"
+              }
+            ],
+            "name": "bloat",
+            "outputs": [],
+            "stateMutability": "nonpayable",
+            "type": "function"
+          },
+          {
+            "inputs": [
+              {
+                "internalType": "uint256",
+                "name": "",
+                "type": "uint256"
+              }
+            ],
+            "name": "heavyStorage",
+            "outputs": [
+              {
+                "internalType": "uint256",
+                "name": "",
+                "type": "uint256"
+              }
+            ],
+            "stateMutability": "view",
+            "type": "function"
+          },
+          {
+            "inputs": [
+              {
+                "internalType": "bytes",
+                "name": "",
+                "type": "bytes"
+              }
+            ],
+            "name": "sink",
+            "outputs": [],
+            "stateMutability": "nonpayable",
+            "type": "function"
+          }
+        ],
+        "gas": {
+          "gasLimit": 8000000
+        }
+      },
+      "SB11": {
+        "address": "0xe55E143071952AfA7591C02cB5b7e43669d482EA",
+        "abi": [
+          {
+            "anonymous": false,
+            "inputs": [
+              {
+                "indexed": false,
+                "internalType": "uint256",
+                "name": "startIdx",
+                "type": "uint256"
+              },
+              {
+                "indexed": false,
+                "internalType": "uint256",
+                "name": "count",
+                "type": "uint256"
+              }
+            ],
+            "name": "Bloated",
+            "type": "event"
+          },
+          {
+            "inputs": [
+              {
+                "internalType": "uint256",
+                "name": "startIdx",
+                "type": "uint256"
+              },
+              {
+                "internalType": "uint256",
+                "name": "count",
+                "type": "uint256"
+              }
+            ],
+            "name": "bloat",
+            "outputs": [],
+            "stateMutability": "nonpayable",
+            "type": "function"
+          },
+          {
+            "inputs": [
+              {
+                "internalType": "uint256",
+                "name": "",
+                "type": "uint256"
+              }
+            ],
+            "name": "heavyStorage",
+            "outputs": [
+              {
+                "internalType": "uint256",
+                "name": "",
+                "type": "uint256"
+              }
+            ],
+            "stateMutability": "view",
+            "type": "function"
+          },
+          {
+            "inputs": [
+              {
+                "internalType": "bytes",
+                "name": "",
+                "type": "bytes"
+              }
+            ],
+            "name": "sink",
+            "outputs": [],
+            "stateMutability": "nonpayable",
+            "type": "function"
+          }
+        ],
+        "gas": {
+          "gasLimit": 8000000
+        }
+      },
+      "SB12": {
+        "address": "0x8642D728a192CFBf3C06EC3Ccadbd35C387196CB",
+        "abi": [
+          {
+            "anonymous": false,
+            "inputs": [
+              {
+                "indexed": false,
+                "internalType": "uint256",
+                "name": "startIdx",
+                "type": "uint256"
+              },
+              {
+                "indexed": false,
+                "internalType": "uint256",
+                "name": "count",
+                "type": "uint256"
+              }
+            ],
+            "name": "Bloated",
+            "type": "event"
+          },
+          {
+            "inputs": [
+              {
+                "internalType": "uint256",
+                "name": "startIdx",
+                "type": "uint256"
+              },
+              {
+                "internalType": "uint256",
+                "name": "count",
+                "type": "uint256"
+              }
+            ],
+            "name": "bloat",
+            "outputs": [],
+            "stateMutability": "nonpayable",
+            "type": "function"
+          },
+          {
+            "inputs": [
+              {
+                "internalType": "uint256",
+                "name": "",
+                "type": "uint256"
+              }
+            ],
+            "name": "heavyStorage",
+            "outputs": [
+              {
+                "internalType": "uint256",
+                "name": "",
+                "type": "uint256"
+              }
+            ],
+            "stateMutability": "view",
+            "type": "function"
+          },
+          {
+            "inputs": [
+              {
+                "internalType": "bytes",
+                "name": "",
+                "type": "bytes"
+              }
+            ],
+            "name": "sink",
+            "outputs": [],
+            "stateMutability": "nonpayable",
+            "type": "function"
+          }
+        ],
+        "gas": {
+          "gasLimit": 8000000
+        }
+      },
+      "SB13": {
+        "address": "0x4f3A3C6DFA330d459904395841A873d9C70fD51c",
+        "abi": [
+          {
+            "anonymous": false,
+            "inputs": [
+              {
+                "indexed": false,
+                "internalType": "uint256",
+                "name": "startIdx",
+                "type": "uint256"
+              },
+              {
+                "indexed": false,
+                "internalType": "uint256",
+                "name": "count",
+                "type": "uint256"
+              }
+            ],
+            "name": "Bloated",
+            "type": "event"
+          },
+          {
+            "inputs": [
+              {
+                "internalType": "uint256",
+                "name": "startIdx",
+                "type": "uint256"
+              },
+              {
+                "internalType": "uint256",
+                "name": "count",
+                "type": "uint256"
+              }
+            ],
+            "name": "bloat",
+            "outputs": [],
+            "stateMutability": "nonpayable",
+            "type": "function"
+          },
+          {
+            "inputs": [
+              {
+                "internalType": "uint256",
+                "name": "",
+                "type": "uint256"
+              }
+            ],
+            "name": "heavyStorage",
+            "outputs": [
+              {
+                "internalType": "uint256",
+                "name": "",
+                "type": "uint256"
+              }
+            ],
+            "stateMutability": "view",
+            "type": "function"
+          },
+          {
+            "inputs": [
+              {
+                "internalType": "bytes",
+                "name": "",
+                "type": "bytes"
+              }
+            ],
+            "name": "sink",
+            "outputs": [],
+            "stateMutability": "nonpayable",
+            "type": "function"
+          }
+        ],
+        "gas": {
+          "gasLimit": 8000000
+        }
+      },
+      "SB14": {
+        "address": "0x707c68A4196A62Ed80c0217E4Cc4fE8dDf9d036B",
+        "abi": [
+          {
+            "anonymous": false,
+            "inputs": [
+              {
+                "indexed": false,
+                "internalType": "uint256",
+                "name": "startIdx",
+                "type": "uint256"
+              },
+              {
+                "indexed": false,
+                "internalType": "uint256",
+                "name": "count",
+                "type": "uint256"
+              }
+            ],
+            "name": "Bloated",
+            "type": "event"
+          },
+          {
+            "inputs": [
+              {
+                "internalType": "uint256",
+                "name": "startIdx",
+                "type": "uint256"
+              },
+              {
+                "internalType": "uint256",
+                "name": "count",
+                "type": "uint256"
+              }
+            ],
+            "name": "bloat",
+            "outputs": [],
+            "stateMutability": "nonpayable",
+            "type": "function"
+          },
+          {
+            "inputs": [
+              {
+                "internalType": "uint256",
+                "name": "",
+                "type": "uint256"
+              }
+            ],
+            "name": "heavyStorage",
+            "outputs": [
+              {
+                "internalType": "uint256",
+                "name": "",
+                "type": "uint256"
+              }
+            ],
+            "stateMutability": "view",
+            "type": "function"
+          },
+          {
+            "inputs": [
+              {
+                "internalType": "bytes",
+                "name": "",
+                "type": "bytes"
+              }
+            ],
+            "name": "sink",
+            "outputs": [],
+            "stateMutability": "nonpayable",
+            "type": "function"
+          }
+        ],
+        "gas": {
+          "gasLimit": 8000000
+        }
+      },
+      "SB15": {
+        "address": "0x46e5114bF3838d35a4410f7dd02b25bb8F29710C",
+        "abi": [
+          {
+            "anonymous": false,
+            "inputs": [
+              {
+                "indexed": false,
+                "internalType": "uint256",
+                "name": "startIdx",
+                "type": "uint256"
+              },
+              {
+                "indexed": false,
+                "internalType": "uint256",
+                "name": "count",
+                "type": "uint256"
+              }
+            ],
+            "name": "Bloated",
+            "type": "event"
+          },
+          {
+            "inputs": [
+              {
+                "internalType": "uint256",
+                "name": "startIdx",
+                "type": "uint256"
+              },
+              {
+                "internalType": "uint256",
+                "name": "count",
+                "type": "uint256"
+              }
+            ],
+            "name": "bloat",
+            "outputs": [],
+            "stateMutability": "nonpayable",
+            "type": "function"
+          },
+          {
+            "inputs": [
+              {
+                "internalType": "uint256",
+                "name": "",
+                "type": "uint256"
+              }
+            ],
+            "name": "heavyStorage",
+            "outputs": [
+              {
+                "internalType": "uint256",
+                "name": "",
+                "type": "uint256"
+              }
+            ],
+            "stateMutability": "view",
+            "type": "function"
+          },
+          {
+            "inputs": [
+              {
+                "internalType": "bytes",
+                "name": "",
+                "type": "bytes"
+              }
+            ],
+            "name": "sink",
+            "outputs": [],
+            "stateMutability": "nonpayable",
+            "type": "function"
+          }
+        ],
+        "gas": {
+          "gasLimit": 8000000
+        }
+      },
+      "SB16": {
+        "address": "0x04303FeD3c52B973C34278ab0F61e744e9f36ebF",
+        "abi": [
+          {
+            "anonymous": false,
+            "inputs": [
+              {
+                "indexed": false,
+                "internalType": "uint256",
+                "name": "startIdx",
+                "type": "uint256"
+              },
+              {
+                "indexed": false,
+                "internalType": "uint256",
+                "name": "count",
+                "type": "uint256"
+              }
+            ],
+            "name": "Bloated",
+            "type": "event"
+          },
+          {
+            "inputs": [
+              {
+                "internalType": "uint256",
+                "name": "startIdx",
+                "type": "uint256"
+              },
+              {
+                "internalType": "uint256",
+                "name": "count",
+                "type": "uint256"
+              }
+            ],
+            "name": "bloat",
+            "outputs": [],
+            "stateMutability": "nonpayable",
+            "type": "function"
+          },
+          {
+            "inputs": [
+              {
+                "internalType": "uint256",
+                "name": "",
+                "type": "uint256"
+              }
+            ],
+            "name": "heavyStorage",
+            "outputs": [
+              {
+                "internalType": "uint256",
+                "name": "",
+                "type": "uint256"
+              }
+            ],
+            "stateMutability": "view",
+            "type": "function"
+          },
+          {
+            "inputs": [
+              {
+                "internalType": "bytes",
+                "name": "",
+                "type": "bytes"
+              }
+            ],
+            "name": "sink",
+            "outputs": [],
+            "stateMutability": "nonpayable",
+            "type": "function"
+          }
+        ],
+        "gas": {
+          "gasLimit": 8000000
+        }
+      },
+      "SB17": {
+        "address": "0x848b9db90374071Cbf63c9A682348279d3c9A336",
+        "abi": [
+          {
+            "anonymous": false,
+            "inputs": [
+              {
+                "indexed": false,
+                "internalType": "uint256",
+                "name": "startIdx",
+                "type": "uint256"
+              },
+              {
+                "indexed": false,
+                "internalType": "uint256",
+                "name": "count",
+                "type": "uint256"
+              }
+            ],
+            "name": "Bloated",
+            "type": "event"
+          },
+          {
+            "inputs": [
+              {
+                "internalType": "uint256",
+                "name": "startIdx",
+                "type": "uint256"
+              },
+              {
+                "internalType": "uint256",
+                "name": "count",
+                "type": "uint256"
+              }
+            ],
+            "name": "bloat",
+            "outputs": [],
+            "stateMutability": "nonpayable",
+            "type": "function"
+          },
+          {
+            "inputs": [
+              {
+                "internalType": "uint256",
+                "name": "",
+                "type": "uint256"
+              }
+            ],
+            "name": "heavyStorage",
+            "outputs": [
+              {
+                "internalType": "uint256",
+                "name": "",
+                "type": "uint256"
+              }
+            ],
+            "stateMutability": "view",
+            "type": "function"
+          },
+          {
+            "inputs": [
+              {
+                "internalType": "bytes",
+                "name": "",
+                "type": "bytes"
+              }
+            ],
+            "name": "sink",
+            "outputs": [],
+            "stateMutability": "nonpayable",
+            "type": "function"
+          }
+        ],
+        "gas": {
+          "gasLimit": 8000000
+        }
+      },
+      "SB18": {
+        "address": "0x34047AEEC11deAd7D16c307bCEEcba7DfB53BB2c",
+        "abi": [
+          {
+            "anonymous": false,
+            "inputs": [
+              {
+                "indexed": false,
+                "internalType": "uint256",
+                "name": "startIdx",
+                "type": "uint256"
+              },
+              {
+                "indexed": false,
+                "internalType": "uint256",
+                "name": "count",
+                "type": "uint256"
+              }
+            ],
+            "name": "Bloated",
+            "type": "event"
+          },
+          {
+            "inputs": [
+              {
+                "internalType": "uint256",
+                "name": "startIdx",
+                "type": "uint256"
+              },
+              {
+                "internalType": "uint256",
+                "name": "count",
+                "type": "uint256"
+              }
+            ],
+            "name": "bloat",
+            "outputs": [],
+            "stateMutability": "nonpayable",
+            "type": "function"
+          },
+          {
+            "inputs": [
+              {
+                "internalType": "uint256",
+                "name": "",
+                "type": "uint256"
+              }
+            ],
+            "name": "heavyStorage",
+            "outputs": [
+              {
+                "internalType": "uint256",
+                "name": "",
+                "type": "uint256"
+              }
+            ],
+            "stateMutability": "view",
+            "type": "function"
+          },
+          {
+            "inputs": [
+              {
+                "internalType": "bytes",
+                "name": "",
+                "type": "bytes"
+              }
+            ],
+            "name": "sink",
+            "outputs": [],
+            "stateMutability": "nonpayable",
+            "type": "function"
+          }
+        ],
+        "gas": {
+          "gasLimit": 8000000
+        }
+      },
+      "SB19": {
+        "address": "0xDDC769BC5d64F5E64b4D3059C8fA093b799C3A63",
+        "abi": [
+          {
+            "anonymous": false,
+            "inputs": [
+              {
+                "indexed": false,
+                "internalType": "uint256",
+                "name": "startIdx",
+                "type": "uint256"
+              },
+              {
+                "indexed": false,
+                "internalType": "uint256",
+                "name": "count",
+                "type": "uint256"
+              }
+            ],
+            "name": "Bloated",
+            "type": "event"
+          },
+          {
+            "inputs": [
+              {
+                "internalType": "uint256",
+                "name": "startIdx",
+                "type": "uint256"
+              },
+              {
+                "internalType": "uint256",
+                "name": "count",
+                "type": "uint256"
+              }
+            ],
+            "name": "bloat",
+            "outputs": [],
+            "stateMutability": "nonpayable",
+            "type": "function"
+          },
+          {
+            "inputs": [
+              {
+                "internalType": "uint256",
+                "name": "",
+                "type": "uint256"
+              }
+            ],
+            "name": "heavyStorage",
+            "outputs": [
+              {
+                "internalType": "uint256",
+                "name": "",
+                "type": "uint256"
+              }
+            ],
+            "stateMutability": "view",
+            "type": "function"
+          },
+          {
+            "inputs": [
+              {
+                "internalType": "bytes",
+                "name": "",
+                "type": "bytes"
+              }
+            ],
+            "name": "sink",
+            "outputs": [],
+            "stateMutability": "nonpayable",
+            "type": "function"
+          }
+        ],
+        "gas": {
+          "gasLimit": 8000000
+        }
+      },
+      "SB20": {
+        "address": "0x2d19B4B0FFCE2E054EE9262853b4E59fDd637C03",
+        "abi": [
+          {
+            "anonymous": false,
+            "inputs": [
+              {
+                "indexed": false,
+                "internalType": "uint256",
+                "name": "startIdx",
+                "type": "uint256"
+              },
+              {
+                "indexed": false,
+                "internalType": "uint256",
+                "name": "count",
+                "type": "uint256"
+              }
+            ],
+            "name": "Bloated",
+            "type": "event"
+          },
+          {
+            "inputs": [
+              {
+                "internalType": "uint256",
+                "name": "startIdx",
+                "type": "uint256"
+              },
+              {
+                "internalType": "uint256",
+                "name": "count",
+                "type": "uint256"
+              }
+            ],
+            "name": "bloat",
+            "outputs": [],
+            "stateMutability": "nonpayable",
+            "type": "function"
+          },
+          {
+            "inputs": [
+              {
+                "internalType": "uint256",
+                "name": "",
+                "type": "uint256"
+              }
+            ],
+            "name": "heavyStorage",
+            "outputs": [
+              {
+                "internalType": "uint256",
+                "name": "",
+                "type": "uint256"
+              }
+            ],
+            "stateMutability": "view",
+            "type": "function"
+          },
+          {
+            "inputs": [
+              {
+                "internalType": "bytes",
+                "name": "",
+                "type": "bytes"
+              }
+            ],
+            "name": "sink",
+            "outputs": [],
+            "stateMutability": "nonpayable",
+            "type": "function"
+          }
+        ],
+        "gas": {
+          "gasLimit": 8000000
+        }
+      },
+      "SB21": {
+        "address": "0xA122EEf15758536A992CfC84FAd7D108E4c8689d",
+        "abi": [
+          {
+            "anonymous": false,
+            "inputs": [
+              {
+                "indexed": false,
+                "internalType": "uint256",
+                "name": "startIdx",
+                "type": "uint256"
+              },
+              {
+                "indexed": false,
+                "internalType": "uint256",
+                "name": "count",
+                "type": "uint256"
+              }
+            ],
+            "name": "Bloated",
+            "type": "event"
+          },
+          {
+            "inputs": [
+              {
+                "internalType": "uint256",
+                "name": "startIdx",
+                "type": "uint256"
+              },
+              {
+                "internalType": "uint256",
+                "name": "count",
+                "type": "uint256"
+              }
+            ],
+            "name": "bloat",
+            "outputs": [],
+            "stateMutability": "nonpayable",
+            "type": "function"
+          },
+          {
+            "inputs": [
+              {
+                "internalType": "uint256",
+                "name": "",
+                "type": "uint256"
+              }
+            ],
+            "name": "heavyStorage",
+            "outputs": [
+              {
+                "internalType": "uint256",
+                "name": "",
+                "type": "uint256"
+              }
+            ],
+            "stateMutability": "view",
+            "type": "function"
+          },
+          {
+            "inputs": [
+              {
+                "internalType": "bytes",
+                "name": "",
+                "type": "bytes"
+              }
+            ],
+            "name": "sink",
+            "outputs": [],
+            "stateMutability": "nonpayable",
+            "type": "function"
+          }
+        ],
+        "gas": {
+          "gasLimit": 8000000
+        }
+      },
+      "SB22": {
+        "address": "0x9069BDd339d8A9a0AD7eE7C36142e6A9c2c612BD",
+        "abi": [
+          {
+            "anonymous": false,
+            "inputs": [
+              {
+                "indexed": false,
+                "internalType": "uint256",
+                "name": "startIdx",
+                "type": "uint256"
+              },
+              {
+                "indexed": false,
+                "internalType": "uint256",
+                "name": "count",
+                "type": "uint256"
+              }
+            ],
+            "name": "Bloated",
+            "type": "event"
+          },
+          {
+            "inputs": [
+              {
+                "internalType": "uint256",
+                "name": "startIdx",
+                "type": "uint256"
+              },
+              {
+                "internalType": "uint256",
+                "name": "count",
+                "type": "uint256"
+              }
+            ],
+            "name": "bloat",
+            "outputs": [],
+            "stateMutability": "nonpayable",
+            "type": "function"
+          },
+          {
+            "inputs": [
+              {
+                "internalType": "uint256",
+                "name": "",
+                "type": "uint256"
+              }
+            ],
+            "name": "heavyStorage",
+            "outputs": [
+              {
+                "internalType": "uint256",
+                "name": "",
+                "type": "uint256"
+              }
+            ],
+            "stateMutability": "view",
+            "type": "function"
+          },
+          {
+            "inputs": [
+              {
+                "internalType": "bytes",
+                "name": "",
+                "type": "bytes"
+              }
+            ],
+            "name": "sink",
+            "outputs": [],
+            "stateMutability": "nonpayable",
+            "type": "function"
+          }
+        ],
+        "gas": {
+          "gasLimit": 8000000
+        }
+      },
+      "SB23": {
+        "address": "0xF6bb2aCDb744Fda17dae8FcAcf92c6b57bFB84AE",
+        "abi": [
+          {
+            "anonymous": false,
+            "inputs": [
+              {
+                "indexed": false,
+                "internalType": "uint256",
+                "name": "startIdx",
+                "type": "uint256"
+              },
+              {
+                "indexed": false,
+                "internalType": "uint256",
+                "name": "count",
+                "type": "uint256"
+              }
+            ],
+            "name": "Bloated",
+            "type": "event"
+          },
+          {
+            "inputs": [
+              {
+                "internalType": "uint256",
+                "name": "startIdx",
+                "type": "uint256"
+              },
+              {
+                "internalType": "uint256",
+                "name": "count",
+                "type": "uint256"
+              }
+            ],
+            "name": "bloat",
+            "outputs": [],
+            "stateMutability": "nonpayable",
+            "type": "function"
+          },
+          {
+            "inputs": [
+              {
+                "internalType": "uint256",
+                "name": "",
+                "type": "uint256"
+              }
+            ],
+            "name": "heavyStorage",
+            "outputs": [
+              {
+                "internalType": "uint256",
+                "name": "",
+                "type": "uint256"
+              }
+            ],
+            "stateMutability": "view",
+            "type": "function"
+          },
+          {
+            "inputs": [
+              {
+                "internalType": "bytes",
+                "name": "",
+                "type": "bytes"
+              }
+            ],
+            "name": "sink",
+            "outputs": [],
+            "stateMutability": "nonpayable",
+            "type": "function"
+          }
+        ],
+        "gas": {
+          "gasLimit": 8000000
+        }
+      },
+      "SB24": {
+        "address": "0x04A7e20C5dFF834652C6045e66092A6Ac04Fd40B",
+        "abi": [
+          {
+            "anonymous": false,
+            "inputs": [
+              {
+                "indexed": false,
+                "internalType": "uint256",
+                "name": "startIdx",
+                "type": "uint256"
+              },
+              {
+                "indexed": false,
+                "internalType": "uint256",
+                "name": "count",
+                "type": "uint256"
+              }
+            ],
+            "name": "Bloated",
+            "type": "event"
+          },
+          {
+            "inputs": [
+              {
+                "internalType": "uint256",
+                "name": "startIdx",
+                "type": "uint256"
+              },
+              {
+                "internalType": "uint256",
+                "name": "count",
+                "type": "uint256"
+              }
+            ],
+            "name": "bloat",
+            "outputs": [],
+            "stateMutability": "nonpayable",
+            "type": "function"
+          },
+          {
+            "inputs": [
+              {
+                "internalType": "uint256",
+                "name": "",
+                "type": "uint256"
+              }
+            ],
+            "name": "heavyStorage",
+            "outputs": [
+              {
+                "internalType": "uint256",
+                "name": "",
+                "type": "uint256"
+              }
+            ],
+            "stateMutability": "view",
+            "type": "function"
+          },
+          {
+            "inputs": [
+              {
+                "internalType": "bytes",
+                "name": "",
+                "type": "bytes"
+              }
+            ],
+            "name": "sink",
+            "outputs": [],
+            "stateMutability": "nonpayable",
+            "type": "function"
+          }
+        ],
+        "gas": {
+          "gasLimit": 8000000
+        }
+      },
+      "SB25": {
+        "address": "0x74796dA70E7225a15fABB56fc37118c606CFBC75",
+        "abi": [
+          {
+            "anonymous": false,
+            "inputs": [
+              {
+                "indexed": false,
+                "internalType": "uint256",
+                "name": "startIdx",
+                "type": "uint256"
+              },
+              {
+                "indexed": false,
+                "internalType": "uint256",
+                "name": "count",
+                "type": "uint256"
+              }
+            ],
+            "name": "Bloated",
+            "type": "event"
+          },
+          {
+            "inputs": [
+              {
+                "internalType": "uint256",
+                "name": "startIdx",
+                "type": "uint256"
+              },
+              {
+                "internalType": "uint256",
+                "name": "count",
+                "type": "uint256"
+              }
+            ],
+            "name": "bloat",
+            "outputs": [],
+            "stateMutability": "nonpayable",
+            "type": "function"
+          },
+          {
+            "inputs": [
+              {
+                "internalType": "uint256",
+                "name": "",
+                "type": "uint256"
+              }
+            ],
+            "name": "heavyStorage",
+            "outputs": [
+              {
+                "internalType": "uint256",
+                "name": "",
+                "type": "uint256"
+              }
+            ],
+            "stateMutability": "view",
+            "type": "function"
+          },
+          {
+            "inputs": [
+              {
+                "internalType": "bytes",
+                "name": "",
+                "type": "bytes"
+              }
+            ],
+            "name": "sink",
+            "outputs": [],
+            "stateMutability": "nonpayable",
+            "type": "function"
+          }
+        ],
+        "gas": {
+          "gasLimit": 8000000
+        }
+      },
+      "SB26": {
+        "address": "0xCE91D5692d0672b9e49C13D92D09b4dd3a6b4d5D",
+        "abi": [
+          {
+            "anonymous": false,
+            "inputs": [
+              {
+                "indexed": false,
+                "internalType": "uint256",
+                "name": "startIdx",
+                "type": "uint256"
+              },
+              {
+                "indexed": false,
+                "internalType": "uint256",
+                "name": "count",
+                "type": "uint256"
+              }
+            ],
+            "name": "Bloated",
+            "type": "event"
+          },
+          {
+            "inputs": [
+              {
+                "internalType": "uint256",
+                "name": "startIdx",
+                "type": "uint256"
+              },
+              {
+                "internalType": "uint256",
+                "name": "count",
+                "type": "uint256"
+              }
+            ],
+            "name": "bloat",
+            "outputs": [],
+            "stateMutability": "nonpayable",
+            "type": "function"
+          },
+          {
+            "inputs": [
+              {
+                "internalType": "uint256",
+                "name": "",
+                "type": "uint256"
+              }
+            ],
+            "name": "heavyStorage",
+            "outputs": [
+              {
+                "internalType": "uint256",
+                "name": "",
+                "type": "uint256"
+              }
+            ],
+            "stateMutability": "view",
+            "type": "function"
+          },
+          {
+            "inputs": [
+              {
+                "internalType": "bytes",
+                "name": "",
+                "type": "bytes"
+              }
+            ],
+            "name": "sink",
+            "outputs": [],
+            "stateMutability": "nonpayable",
+            "type": "function"
+          }
+        ],
+        "gas": {
+          "gasLimit": 8000000
+        }
+      },
+      "SB27": {
+        "address": "0xaCffCA8e69113eF755940bAbd31DCEa41341b166",
+        "abi": [
+          {
+            "anonymous": false,
+            "inputs": [
+              {
+                "indexed": false,
+                "internalType": "uint256",
+                "name": "startIdx",
+                "type": "uint256"
+              },
+              {
+                "indexed": false,
+                "internalType": "uint256",
+                "name": "count",
+                "type": "uint256"
+              }
+            ],
+            "name": "Bloated",
+            "type": "event"
+          },
+          {
+            "inputs": [
+              {
+                "internalType": "uint256",
+                "name": "startIdx",
+                "type": "uint256"
+              },
+              {
+                "internalType": "uint256",
+                "name": "count",
+                "type": "uint256"
+              }
+            ],
+            "name": "bloat",
+            "outputs": [],
+            "stateMutability": "nonpayable",
+            "type": "function"
+          },
+          {
+            "inputs": [
+              {
+                "internalType": "uint256",
+                "name": "",
+                "type": "uint256"
+              }
+            ],
+            "name": "heavyStorage",
+            "outputs": [
+              {
+                "internalType": "uint256",
+                "name": "",
+                "type": "uint256"
+              }
+            ],
+            "stateMutability": "view",
+            "type": "function"
+          },
+          {
+            "inputs": [
+              {
+                "internalType": "bytes",
+                "name": "",
+                "type": "bytes"
+              }
+            ],
+            "name": "sink",
+            "outputs": [],
+            "stateMutability": "nonpayable",
+            "type": "function"
+          }
+        ],
+        "gas": {
+          "gasLimit": 8000000
+        }
+      },
+      "SB28": {
+        "address": "0xa1c12D999eb68eF182D5CEB43b34C79DEC53aC87",
+        "abi": [
+          {
+            "anonymous": false,
+            "inputs": [
+              {
+                "indexed": false,
+                "internalType": "uint256",
+                "name": "startIdx",
+                "type": "uint256"
+              },
+              {
+                "indexed": false,
+                "internalType": "uint256",
+                "name": "count",
+                "type": "uint256"
+              }
+            ],
+            "name": "Bloated",
+            "type": "event"
+          },
+          {
+            "inputs": [
+              {
+                "internalType": "uint256",
+                "name": "startIdx",
+                "type": "uint256"
+              },
+              {
+                "internalType": "uint256",
+                "name": "count",
+                "type": "uint256"
+              }
+            ],
+            "name": "bloat",
+            "outputs": [],
+            "stateMutability": "nonpayable",
+            "type": "function"
+          },
+          {
+            "inputs": [
+              {
+                "internalType": "uint256",
+                "name": "",
+                "type": "uint256"
+              }
+            ],
+            "name": "heavyStorage",
+            "outputs": [
+              {
+                "internalType": "uint256",
+                "name": "",
+                "type": "uint256"
+              }
+            ],
+            "stateMutability": "view",
+            "type": "function"
+          },
+          {
+            "inputs": [
+              {
+                "internalType": "bytes",
+                "name": "",
+                "type": "bytes"
+              }
+            ],
+            "name": "sink",
+            "outputs": [],
+            "stateMutability": "nonpayable",
+            "type": "function"
+          }
+        ],
+        "gas": {
+          "gasLimit": 8000000
+        }
+      },
+      "SB29": {
+        "address": "0x795bf6d7C082c640E3b2903508f606C112875169",
+        "abi": [
+          {
+            "anonymous": false,
+            "inputs": [
+              {
+                "indexed": false,
+                "internalType": "uint256",
+                "name": "startIdx",
+                "type": "uint256"
+              },
+              {
+                "indexed": false,
+                "internalType": "uint256",
+                "name": "count",
+                "type": "uint256"
+              }
+            ],
+            "name": "Bloated",
+            "type": "event"
+          },
+          {
+            "inputs": [
+              {
+                "internalType": "uint256",
+                "name": "startIdx",
+                "type": "uint256"
+              },
+              {
+                "internalType": "uint256",
+                "name": "count",
+                "type": "uint256"
+              }
+            ],
+            "name": "bloat",
+            "outputs": [],
+            "stateMutability": "nonpayable",
+            "type": "function"
+          },
+          {
+            "inputs": [
+              {
+                "internalType": "uint256",
+                "name": "",
+                "type": "uint256"
+              }
+            ],
+            "name": "heavyStorage",
+            "outputs": [
+              {
+                "internalType": "uint256",
+                "name": "",
+                "type": "uint256"
+              }
+            ],
+            "stateMutability": "view",
+            "type": "function"
+          },
+          {
+            "inputs": [
+              {
+                "internalType": "bytes",
+                "name": "",
+                "type": "bytes"
+              }
+            ],
+            "name": "sink",
+            "outputs": [],
+            "stateMutability": "nonpayable",
+            "type": "function"
+          }
+        ],
+        "gas": {
+          "gasLimit": 8000000
+        }
+      }
+    },
+    "transactionOptions": {
+      "gas": 8000000,
+      "gasPrice": "0"
+    },
+    "latencyLogPath": "/home/yeochan.yoon/caliper-stress-test/results/latency/harsh-baseline-20260128",
+    "contractDeployerAddressPrivateKey": "0x8f2a55949038a9610f502c24114d051185071191bc20b60811a2d7fba4513689",
+    "gasPrice": 0,
+    "chainId": 1337,
+    "transactionBlockTimeout": 500,
+    "transactionConfirmationBlocks": 1,
+    "txWallClockTimeout": 300,
+    "transactionPollingTimeout": 90
+  }
+}
