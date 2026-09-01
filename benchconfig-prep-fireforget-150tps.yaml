@@ -1,0 +1,35 @@
+test:
+  name: prep-fireforget-150tps
+  description: PREP NM eval @ 150 TPS, fire-and-forget dispatch (bounded in-flight semaphore + per-round attempt cap, ported from mixedAttackLOHRaacBurst.js) plus gasPrice variation to prevent TxPool tie-lock. 120s warmup + 300s measure, 30 workers, 30 contracts.
+  workers:
+    type: local
+    number: 30
+  rounds:
+    - label: warmup
+      txDuration: 120
+      rateControl:
+        type: fixed-rate
+        opts:
+          tps: 150
+      workload:
+        module: benchmarks/stateBloatFireAndForget.js
+        arguments:
+          slotsPerTx: 200
+          numContracts: 30
+          contractPrefix: SB
+          roundDurationSeconds: 120
+          tps: 150
+    - label: measure
+      txDuration: 300
+      rateControl:
+        type: fixed-rate
+        opts:
+          tps: 150
+      workload:
+        module: benchmarks/stateBloatFireAndForget.js
+        arguments:
+          slotsPerTx: 200
+          numContracts: 30
+          contractPrefix: SB
+          roundDurationSeconds: 300
+          tps: 150

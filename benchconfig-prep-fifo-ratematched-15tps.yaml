@@ -1,0 +1,31 @@
+test:
+  name: prep-fifo-ratematched-15tps
+  description: Rate-matched FIFO control -- throttle baseline to ~15 TPS (the actual achieved throughput of the locality-aware scheduling variants under 150 TPS offered load) to test whether the scheduling variants' lower per-tx GC cost is a genuine locality effect or simply an artifact of lower throughput. 120s warmup + 300s measure, 30 workers, 30 contracts, same as canonical eval.
+  workers:
+    type: local
+    number: 30
+  rounds:
+    - label: warmup
+      txDuration: 120
+      rateControl:
+        type: fixed-rate
+        opts:
+          tps: 15
+      workload:
+        module: benchmarks/stateBloat.js
+        arguments:
+          slotsPerTx: 200
+          numContracts: 30
+          contractPrefix: SB
+    - label: measure
+      txDuration: 300
+      rateControl:
+        type: fixed-rate
+        opts:
+          tps: 15
+      workload:
+        module: benchmarks/stateBloat.js
+        arguments:
+          slotsPerTx: 200
+          numContracts: 30
+          contractPrefix: SB

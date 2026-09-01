@@ -1,32 +1,44 @@
 #!/bin/bash
 # ============================================================
-# PREP Evaluation Harness — Besu @ 4 GB heap
+# RATE-MATCHED FIFO CONTROL — Besu @ 4 GB heap
 #
-# 5 variants × 5 replications = 25 runs, interleaved per rep
-#   baseline   : -Dlast.variant=DISABLED         (FIFO)
-#   last_hfl   : -Dlast.variant=HYBRID_FEE_LOCALITY  (α=β=0.5)
-#   mats       : -Dlast.variant=MATS             (adaptive α/β via EWMA JVM pressure)
-#   prep       : -Dlast.variant=PREP             (admission gate, EWMA pressure)
-#   prep_sched : -Dlast.variant=PREP_SCHED       (PREP gate + boosted β)
+# Motivation (brainstorm session, 2026-08-28, /octo:brainstorm Team mode):
+# re-analysis of the canonical n=5 Besu results showed locality-aware
+# scheduling variants (HFL/MATS/PREP/PREP_SCHED) achieve ~60% lower
+# GC-ms-per-1000-tx than Baseline FIFO, but ALSO only 43-57% of Baseline's
+# actual throughput (tx/sec) under the 150 TPS offered overload. Question:
+# is the lower per-tx GC cost a genuine locality effect, or just an
+# artifact of processing fewer transactions per unit time?
 #
-# Interleaved order: b1→hfl1→mats1→prep1→ps1→b2→…
+# This experiment throttles plain FIFO (DISABLED variant, no scheduling)
+# down to ~15 TPS -- matching the scheduling variants' ACHIEVED throughput
+# -- and re-measures GC-ms-per-1000-tx. Decisive interpretation:
+#   - if rate-matched FIFO still shows ~66 ms/1000tx (like full-rate FIFO):
+#     locality effect is real, independent of throughput.
+#   - if it drops to ~26-28 ms/1000tx (like the scheduling variants):
+#     the "locality benefit" is largely a throughput artifact -- any
+#     variant processing fewer tx/sec would show the same GC reduction.
 #
-# Binary: besu-mats (besu-24.1.1 + PREP-patched blockcreation jar)
-# Load:   120s warmup + 300s measure, 150 TPS, 30 workers, 30 contracts
-# TX:     stateBloat 200 slots/tx
-# GC:     JVM G1GC unified log per run + gc_total_delta_ms from LASTMetricsLogger
-# Log:    last.log.path CSV per run (extended schema for PREP/PREP_SCHED)
-# Output: results/prep_eval_besu/<RUN_ID>/
+# n=5 replicates of DISABLED variant @ 15 TPS (vs 150 TPS in the canonical
+# eval). Everything else (heap, warmup/measure duration, workload, workers)
+# matches the canonical run_prep_eval_besu.sh exactly.
+#
+# Output: results/prep_fifo_ratematched/<RUN_ID>/
 # ============================================================
 set -e
-cd /home/yeochan.yoon/caliper-stress-test
+# Isolated CWD (NOT the shared caliper-stress-test dir) so this host's
+# networkconfig.json/caliper.log/report.html/deployed_contracts.json don't
+# race with compute23's simultaneous run over the same NFS mount. Read-only
+# assets (benchmarks/, StateBloater.json, log4j2-console.xml, benchconfig,
+# deploy script) are symlinked back to the shared dir.
+cd /home/yeochan.yoon/caliper-stress-test-c24
 
 export JAVA_HOME="/home/yeochan.yoon/jdk17-portable"
-export PATH="${JAVA_HOME}/bin:${PATH}"
+export PATH="${JAVA_HOME}/bin:/home/yeochan.yoon/node22/bin:${PATH}"
 
 BESU_BIN="/home/yeochan.yoon/besu-mats/bin/besu"
 LOG4J_CONFIG="/home/yeochan.yoon/caliper-stress-test/log4j2-console.xml"
-BENCHCONFIG="benchconfig-last-vs-lass-nm.yaml"
+BENCHCONFIG="benchconfig-prep-fifo-ratematched-15tps.yaml"
 NETWORKCONFIG="networkconfig.json"
 DEPLOY_SCRIPT="deploy_multi_contracts.py"
 
@@ -39,8 +51,8 @@ COOLDOWN_BETWEEN_RUNS=20
 INTER_REP_COOLDOWN=60
 CALIPER_TIMEOUT=1500
 
-RUN_ID=$(date +%Y%m%d_%H%M%S)_prep_eval_besu
-RESULTS_DIR="/home/yeochan.yoon/caliper-stress-test/results/prep_eval_besu/${RUN_ID}"
+RUN_ID=$(date +%Y%m%d_%H%M%S)_prep_fifo_ratematched
+RESULTS_DIR="/home/yeochan.yoon/caliper-stress-test/results/prep_fifo_ratematched/${RUN_ID}"
 mkdir -p "${RESULTS_DIR}"
 
 # ── Helpers ───────────────────────────────────────────────────────────────────
@@ -148,7 +160,7 @@ ${NO_LASS}"
     fi
     sleep 3
 
-    echo "  Running Caliper (120s warmup + 300s measure @ 150 TPS)..."
+    echo "  Running Caliper (120s warmup + 300s measure @ 15 TPS, rate-matched)..."
     local t_start; t_start=$(date +%s)
     timeout ${CALIPER_TIMEOUT} npx caliper launch manager \
         --caliper-workspace ./ \
@@ -170,18 +182,19 @@ ${NO_LASS}"
     # ── Parse GC summary from last_metrics.csv ────────────────────────────────
     if [ -f "${last_csv}" ]; then
         local blocks; blocks=$(( $(wc -l < "${last_csv}") - 1 ))
-        # sum gc_total_delta_ms (col 15) and block_duration_ms (col 10)
-        # For PREP/PREP_SCHED: also sum prep_admitted (col 21) and prep_deferred (col 22)
         local gc_stats
-        gc_stats=$(awk -F, 'NR>1 {gc+=$15; dur+=$10; tx+=$4; wh+=$5; pa+=$21; pd+=$22}
+        gc_stats=$(awk -F, 'NR>1 {gc+=$15; dur+=$10; tx+=$4; wh+=$5; nblk+=1}
+            NR==2 {t0=$1}
+            {t1=$1}
             END {
-                printf "total_gc_ms=%.0f\ntrace_duration_ms=%.0f\ntx_total=%d\nwarm_hits=%d\nprep_admitted=%d\nprep_deferred=%d\n",
-                       gc, dur, tx, wh, pa, pd
+                gc_per_1000tx = (tx>0 ? gc/tx*1000 : 0)
+                tps = (t1>t0 ? tx/((t1-t0)/1000.0) : 0)
+                printf "total_gc_ms=%.0f\ntrace_duration_ms=%.0f\ntx_total=%d\nwarm_hits=%d\navg_tx_per_block=%.3f\ngc_ms_per_1000tx=%.3f\ntx_per_sec=%.3f\n",
+                       gc, dur, tx, wh, (nblk>0 ? tx/nblk : 0), gc_per_1000tx, tps
             }' "${last_csv}")
         echo "${gc_stats}" > "${run_dir}/gc_summary.txt"
         echo "  LAST log: ${blocks} blocks"
-        echo "  $(grep total_gc_ms "${run_dir}/gc_summary.txt" | head -1)"
-        echo "  $(grep prep_deferred "${run_dir}/gc_summary.txt" | head -1)"
+        cat "${run_dir}/gc_summary.txt" | sed 's/^/  /'
     fi
 
     local measure_line; measure_line=$(grep "| measure " "${run_dir}/caliper_console.log" | tail -1 || true)
@@ -193,26 +206,37 @@ ${NO_LASS}"
 
 # ── Provenance ────────────────────────────────────────────────────────────────
 cat > "${RESULTS_DIR}/provenance.txt" <<EOF
-PREP Evaluation — Besu 4 GB / 150 TPS / 5 variants × 5 reps
+Rate-Matched FIFO Control — Besu 4 GB / 15 TPS (DISABLED variant only)
 =============================================================
 Run ID: ${RUN_ID}
 Date:   $(date)
 Host:   $(hostname)
 Binary: ${BESU_BIN}
 Heap:   -Xms4g -Xmx4g (G1GC, MaxGCPauseMillis=200)
-Variants: DISABLED, HYBRID_FEE_LOCALITY(0.5/0.5), MATS, PREP, PREP_SCHED
-Load:     150 TPS, 30 contracts × 200 slots, 120s warmup + 300s measure
-PREP gate: θ_p=0.20, θ̄=0.05, Δ=0.30, f_c=0.25, τ=3
-PREP_SCHED: β' = min(β+0.30, 0.95)
+Variant: DISABLED (plain FIFO), n=${REPLICATIONS}
+Load:     15 TPS (vs 150 TPS canonical), 30 contracts × 200 slots, 120s warmup + 300s measure
+
+Motivation: canonical n=5 Besu results show HFL/MATS/PREP/PREP_SCHED at ~26-28
+gc_ms_per_1000tx vs Baseline's 66.6, but those variants also only achieve
+43-57% of Baseline's actual tx/sec (14.6-19.5 vs 34.0). This experiment
+throttles FIFO down to ~15 TPS -- matching the scheduling variants' achieved
+rate -- to test whether the lower per-tx GC cost is a genuine locality
+effect or a throughput artifact.
+
+Decisive interpretation (pre-registered before running):
+  - gc_ms_per_1000tx stays near ~66 (full-rate FIFO's value): locality
+    effect is real and independent of throughput.
+  - gc_ms_per_1000tx drops to ~26-28 (matching scheduling variants):
+    the "locality benefit" is largely explained by lower throughput alone.
 EOF
 
-# ── Main loop ─────────────────────────────────────────────────────────────────
+# ── Main loop ────────────────────────────────────────────────────────────────
+TOTAL_RUNS=${REPLICATIONS}
 echo "======================================================================"
-echo "PREP Eval Besu | 150 TPS | 120s+300s | 5 variants × 5 reps (interleaved)"
+echo "Rate-matched FIFO control [compute24] | 15 TPS | 120s+300s | ${TOTAL_RUNS} runs"
 echo "Run ID: ${RUN_ID}"
 echo "Results: ${RESULTS_DIR}"
 echo "======================================================================"
-echo "Starting 25 runs..."
 
 for rep in $(seq 1 ${REPLICATIONS}); do
     echo ""
@@ -220,11 +244,7 @@ for rep in $(seq 1 ${REPLICATIONS}); do
     echo "REPLICATION ${rep}/${REPLICATIONS}"
     echo "══════════════════════════════════════════════════════════════════"
 
-    run_single "baseline"   ${rep} "-Dlast.variant=DISABLED" || true
-    run_single "last_hfl"   ${rep} "-Dlast.variant=HYBRID_FEE_LOCALITY" "-Dlast.alpha=0.5 -Dlast.beta=0.5" || true
-    run_single "mats"       ${rep} "-Dlast.variant=MATS" || true
-    run_single "prep"       ${rep} "-Dlast.variant=PREP" || true
-    run_single "prep_sched" ${rep} "-Dlast.variant=PREP_SCHED" || true
+    run_single "fifo_15tps" ${rep} "-Dlast.variant=DISABLED" || true
 
     if [ ${rep} -lt ${REPLICATIONS} ]; then
         echo "  (inter-rep cooldown ${INTER_REP_COOLDOWN}s)"
@@ -234,6 +254,16 @@ done
 
 echo ""
 echo "======================================================================"
-echo "All 25 runs complete."
+echo "Rate-matched FIFO control: all ${TOTAL_RUNS} runs complete."
 echo "Results: ${RESULTS_DIR}"
 echo "======================================================================"
+echo ""
+echo "Per-rep GC summary (fifo_15tps):"
+for rep in $(seq 1 ${REPLICATIONS}); do
+    f="${RESULTS_DIR}/fifo_15tps_${rep}/gc_summary.txt"
+    if [ -f "${f}" ]; then
+        echo "  rep${rep}: $(grep gc_ms_per_1000tx "$f") $(grep tx_per_sec "$f")"
+    else
+        echo "  rep${rep}: NO SUMMARY (failed, check ${RESULTS_DIR}/fifo_15tps_${rep}/)"
+    fi
+done

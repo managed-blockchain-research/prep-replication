@@ -1,22 +1,17 @@
 #!/bin/bash
 # ============================================================
-# PREP Evaluation Harness — Besu @ 4 GB heap
+# PREP theta_p SMOKE TEST — Besu @ 4 GB heap
 #
-# 5 variants × 5 replications = 25 runs, interleaved per rep
-#   baseline   : -Dlast.variant=DISABLED         (FIFO)
-#   last_hfl   : -Dlast.variant=HYBRID_FEE_LOCALITY  (α=β=0.5)
-#   mats       : -Dlast.variant=MATS             (adaptive α/β via EWMA JVM pressure)
-#   prep       : -Dlast.variant=PREP             (admission gate, EWMA pressure)
-#   prep_sched : -Dlast.variant=PREP_SCHED       (PREP gate + boosted β)
+# NOT for reporting GC-pause numbers. Purpose: confirm that a
+# recalibrated theta_p actually produces nonzero prep_deferred
+# telemetry within a short window, before committing hardware
+# time to the full n=5 x 3-theta sweep. One rep per theta value,
+# PREP variant only (PREP_SCHED shares the same gate logic).
 #
-# Interleaved order: b1→hfl1→mats1→prep1→ps1→b2→…
-#
-# Binary: besu-mats (besu-24.1.1 + PREP-patched blockcreation jar)
-# Load:   120s warmup + 300s measure, 150 TPS, 30 workers, 30 contracts
-# TX:     stateBloat 200 slots/tx
-# GC:     JVM G1GC unified log per run + gc_total_delta_ms from LASTMetricsLogger
-# Log:    last.log.path CSV per run (extended schema for PREP/PREP_SCHED)
-# Output: results/prep_eval_besu/<RUN_ID>/
+# Binary: besu-mats (besu-24.1.1 + PREP-patched blockcreation jar,
+#         PREP_PRESSURE_THRESHOLD now reads -Dprep.theta_p, default 0.20)
+# Load:   60s warmup + 90s measure, 150 TPS, 30 workers, 30 contracts
+# Output: results/prep_theta_smoke/<RUN_ID>/
 # ============================================================
 set -e
 cd /home/yeochan.yoon/caliper-stress-test
@@ -26,7 +21,7 @@ export PATH="${JAVA_HOME}/bin:${PATH}"
 
 BESU_BIN="/home/yeochan.yoon/besu-mats/bin/besu"
 LOG4J_CONFIG="/home/yeochan.yoon/caliper-stress-test/log4j2-console.xml"
-BENCHCONFIG="benchconfig-last-vs-lass-nm.yaml"
+BENCHCONFIG="benchconfig-prep-theta-smoke.yaml"
 NETWORKCONFIG="networkconfig.json"
 DEPLOY_SCRIPT="deploy_multi_contracts.py"
 
@@ -34,13 +29,12 @@ HEAP="4g"
 NEWGEN_FLAGS="-XX:+UnlockExperimentalVMOptions -XX:G1MaxNewSizePercent=90 -XX:G1NewSizePercent=20"
 NO_LASS="-Dlass.old.gen.activation.threshold=2.0"
 
-REPLICATIONS=5
-COOLDOWN_BETWEEN_RUNS=20
-INTER_REP_COOLDOWN=60
-CALIPER_TIMEOUT=1500
+THETA_VALUES="0.04 0.05 0.07"
+COOLDOWN_BETWEEN_RUNS=15
+CALIPER_TIMEOUT=400
 
-RUN_ID=$(date +%Y%m%d_%H%M%S)_prep_eval_besu
-RESULTS_DIR="/home/yeochan.yoon/caliper-stress-test/results/prep_eval_besu/${RUN_ID}"
+RUN_ID=$(date +%Y%m%d_%H%M%S)_prep_theta_smoke
+RESULTS_DIR="/home/yeochan.yoon/caliper-stress-test/results/prep_theta_smoke/${RUN_ID}"
 mkdir -p "${RESULTS_DIR}"
 
 # ── Helpers ───────────────────────────────────────────────────────────────────
@@ -148,7 +142,7 @@ ${NO_LASS}"
     fi
     sleep 3
 
-    echo "  Running Caliper (120s warmup + 300s measure @ 150 TPS)..."
+    echo "  Running Caliper (60s warmup + 90s measure @ 150 TPS, smoke)..."
     local t_start; t_start=$(date +%s)
     timeout ${CALIPER_TIMEOUT} npx caliper launch manager \
         --caliper-workspace ./ \
@@ -193,47 +187,51 @@ ${NO_LASS}"
 
 # ── Provenance ────────────────────────────────────────────────────────────────
 cat > "${RESULTS_DIR}/provenance.txt" <<EOF
-PREP Evaluation — Besu 4 GB / 150 TPS / 5 variants × 5 reps
-=============================================================
+PREP theta_p SMOKE TEST — Besu 4 GB / 150 TPS / PREP variant only / 1 rep per theta
+=====================================================================================
 Run ID: ${RUN_ID}
 Date:   $(date)
 Host:   $(hostname)
 Binary: ${BESU_BIN}
 Heap:   -Xms4g -Xmx4g (G1GC, MaxGCPauseMillis=200)
-Variants: DISABLED, HYBRID_FEE_LOCALITY(0.5/0.5), MATS, PREP, PREP_SCHED
-Load:     150 TPS, 30 contracts × 200 slots, 120s warmup + 300s measure
-PREP gate: θ_p=0.20, θ̄=0.05, Δ=0.30, f_c=0.25, τ=3
-PREP_SCHED: β' = min(β+0.30, 0.95)
+Theta values swept: ${THETA_VALUES}
+Load:     150 TPS, 30 contracts × 200 slots, 60s warmup + 90s measure (SHORT WINDOW)
+Purpose:  confirm nonzero prep_deferred at each candidate theta_p before
+          committing to the full n=5 x 3-theta evaluation sweep.
+NOT a result for the paper -- window too short for steady-state GC-pause numbers.
 EOF
 
 # ── Main loop ─────────────────────────────────────────────────────────────────
 echo "======================================================================"
-echo "PREP Eval Besu | 150 TPS | 120s+300s | 5 variants × 5 reps (interleaved)"
+echo "PREP theta_p smoke test | 150 TPS | 60s+90s | PREP variant, 1 rep/theta"
 echo "Run ID: ${RUN_ID}"
 echo "Results: ${RESULTS_DIR}"
 echo "======================================================================"
-echo "Starting 25 runs..."
 
-for rep in $(seq 1 ${REPLICATIONS}); do
+for theta in ${THETA_VALUES}; do
     echo ""
     echo "══════════════════════════════════════════════════════════════════"
-    echo "REPLICATION ${rep}/${REPLICATIONS}"
+    echo "THETA_P = ${theta}"
     echo "══════════════════════════════════════════════════════════════════"
 
-    run_single "baseline"   ${rep} "-Dlast.variant=DISABLED" || true
-    run_single "last_hfl"   ${rep} "-Dlast.variant=HYBRID_FEE_LOCALITY" "-Dlast.alpha=0.5 -Dlast.beta=0.5" || true
-    run_single "mats"       ${rep} "-Dlast.variant=MATS" || true
-    run_single "prep"       ${rep} "-Dlast.variant=PREP" || true
-    run_single "prep_sched" ${rep} "-Dlast.variant=PREP_SCHED" || true
+    run_single "prep_theta${theta}" 1 "-Dlast.variant=PREP" "-Dprep.theta_p=${theta}" || true
 
-    if [ ${rep} -lt ${REPLICATIONS} ]; then
-        echo "  (inter-rep cooldown ${INTER_REP_COOLDOWN}s)"
-        sleep ${INTER_REP_COOLDOWN}
-    fi
+    echo "  (cooldown ${COOLDOWN_BETWEEN_RUNS}s)"
+    sleep ${COOLDOWN_BETWEEN_RUNS}
 done
 
 echo ""
 echo "======================================================================"
-echo "All 25 runs complete."
+echo "Smoke test complete for theta_p in: ${THETA_VALUES}"
 echo "Results: ${RESULTS_DIR}"
 echo "======================================================================"
+echo ""
+echo "Checking deferral telemetry per theta:"
+for theta in ${THETA_VALUES}; do
+    summary="${RESULTS_DIR}/prep_theta${theta}_1/gc_summary.txt"
+    if [ -f "${summary}" ]; then
+        echo "  theta_p=${theta}: $(grep prep_deferred "${summary}") $(grep prep_admitted "${summary}")"
+    else
+        echo "  theta_p=${theta}: NO SUMMARY (run likely failed, check ${RESULTS_DIR}/prep_theta${theta}_1/)"
+    fi
+done

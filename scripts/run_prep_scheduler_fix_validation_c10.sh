@@ -1,30 +1,53 @@
 #!/bin/bash
 # ============================================================
-# PREP Evaluation Harness — Besu @ 4 GB heap
+# LASTScheduler.reorder() PERFORMANCE-FIX VALIDATION — Besu @ 4 GB heap
 #
-# 5 variants × 5 replications = 25 runs, interleaved per rep
-#   baseline   : -Dlast.variant=DISABLED         (FIFO)
-#   last_hfl   : -Dlast.variant=HYBRID_FEE_LOCALITY  (α=β=0.5)
-#   mats       : -Dlast.variant=MATS             (adaptive α/β via EWMA JVM pressure)
-#   prep       : -Dlast.variant=PREP             (admission gate, EWMA pressure)
-#   prep_sched : -Dlast.variant=PREP_SCHED       (PREP gate + boosted β)
+# Root cause found 2026-08-28: reorderHybridWithWeights() (shared by HFL,
+# MATS, PREP, PREP_SCHED) sorted with a comparator that called
+# computeHflScore() on BOTH operands of every comparison, turning an O(n)
+# scoring pass into O(n log n) score recomputations. Measured
+# scheduler_overhead_us in canonical Besu data: ~75,000-135,000us (75-135ms)
+# per block-assembly call -- ~1000x the NM/CLR port's ~75-84us for the
+# equivalent step. This is the prime suspect for why Besu scheduling
+# variants achieve only 43-57% of Baseline FIFO's throughput while NM's
+# HFL/MATS retain 94-96% -- a JVM-implementation-specific inefficiency, not
+# a flaw in the locality-scheduling idea itself (confirmed via a
+# rate-matched-FIFO control experiment showing Besu's GC-pause "benefit" is
+# largely a throughput artifact -- see prep_fifo_ratematched results).
 #
-# Interleaved order: b1→hfl1→mats1→prep1→ps1→b2→…
+# Fix: precompute each candidate's score once (ScoredTx), then sort on the
+# cached value -- O(n) scoring + O(n log n) cheap double comparisons.
 #
-# Binary: besu-mats (besu-24.1.1 + PREP-patched blockcreation jar)
-# Load:   120s warmup + 300s measure, 150 TPS, 30 workers, 30 contracts
-# TX:     stateBloat 200 slots/tx
-# GC:     JVM G1GC unified log per run + gc_total_delta_ms from LASTMetricsLogger
-# Log:    last.log.path CSV per run (extended schema for PREP/PREP_SCHED)
-# Output: results/prep_eval_besu/<RUN_ID>/
+# This validation reruns all 5 variants (Baseline, HFL, MATS, PREP,
+# PREP_SCHED) at n=1, canonical theta_p=0.20 (default, gate inactive),
+# 150 TPS, using the FIXED jar in an ISOLATED install
+# (~/besu-mats-fixed, NOT ~/besu-mats -- compute23's ongoing theta_p sweep
+# still uses the original, unpatched jar and must not be disturbed).
+# Compare avg_tx_per_block / tx_per_sec / gc_ms_per_1000tx against the
+# canonical (pre-fix) numbers:
+#   Baseline: 34.0 tx/s, 270.8 tx/block, 66.6 ms/1000tx
+#   HFL:      14.6 tx/s,  40.6 tx/block, 27.8 ms/1000tx
+#   MATS:     14.7 tx/s,  42.4 tx/block, 26.9 ms/1000tx
+#   PREP:     19.5 tx/s,  38.4 tx/block, 26.3 ms/1000tx
+#   PREP_SCHED: 17.8 tx/s, 40.3 tx/block, 26.7 ms/1000tx
+# If the fix worked, scheduling variants' tx/s and tx/block should move
+# substantially toward Baseline's, while gc_ms_per_1000tx should stay low
+# (confirming a genuine, throughput-independent locality benefit survives).
+#
+# Output: results/prep_scheduler_fix_validation/<RUN_ID>/
 # ============================================================
 set -e
-cd /home/yeochan.yoon/caliper-stress-test
+# Isolated CWD (NOT the shared caliper-stress-test dir) so this host's
+# networkconfig.json/caliper.log/report.html/deployed_contracts.json don't
+# race with compute23's simultaneous run over the same NFS mount. Read-only
+# assets (benchmarks/, StateBloater.json, log4j2-console.xml, benchconfig,
+# deploy script) are symlinked back to the shared dir.
+cd /home/yeochan.yoon/caliper-stress-test-c10
 
 export JAVA_HOME="/home/yeochan.yoon/jdk17-portable"
-export PATH="${JAVA_HOME}/bin:${PATH}"
+export PATH="${JAVA_HOME}/bin:/home/yeochan.yoon/node22/bin:${PATH}"
 
-BESU_BIN="/home/yeochan.yoon/besu-mats/bin/besu"
+BESU_BIN="/home/yeochan.yoon/besu-mats-fixed/bin/besu"
 LOG4J_CONFIG="/home/yeochan.yoon/caliper-stress-test/log4j2-console.xml"
 BENCHCONFIG="benchconfig-last-vs-lass-nm.yaml"
 NETWORKCONFIG="networkconfig.json"
@@ -34,13 +57,12 @@ HEAP="4g"
 NEWGEN_FLAGS="-XX:+UnlockExperimentalVMOptions -XX:G1MaxNewSizePercent=90 -XX:G1NewSizePercent=20"
 NO_LASS="-Dlass.old.gen.activation.threshold=2.0"
 
-REPLICATIONS=5
+REPLICATIONS=1
 COOLDOWN_BETWEEN_RUNS=20
-INTER_REP_COOLDOWN=60
 CALIPER_TIMEOUT=1500
 
-RUN_ID=$(date +%Y%m%d_%H%M%S)_prep_eval_besu
-RESULTS_DIR="/home/yeochan.yoon/caliper-stress-test/results/prep_eval_besu/${RUN_ID}"
+RUN_ID=$(date +%Y%m%d_%H%M%S)_prep_scheduler_fix_validation
+RESULTS_DIR="/home/yeochan.yoon/caliper-stress-test/results/prep_scheduler_fix_validation/${RUN_ID}"
 mkdir -p "${RESULTS_DIR}"
 
 # ── Helpers ───────────────────────────────────────────────────────────────────
@@ -170,18 +192,20 @@ ${NO_LASS}"
     # ── Parse GC summary from last_metrics.csv ────────────────────────────────
     if [ -f "${last_csv}" ]; then
         local blocks; blocks=$(( $(wc -l < "${last_csv}") - 1 ))
-        # sum gc_total_delta_ms (col 15) and block_duration_ms (col 10)
-        # For PREP/PREP_SCHED: also sum prep_admitted (col 21) and prep_deferred (col 22)
         local gc_stats
-        gc_stats=$(awk -F, 'NR>1 {gc+=$15; dur+=$10; tx+=$4; wh+=$5; pa+=$21; pd+=$22}
+        gc_stats=$(awk -F, 'NR>1 {gc+=$15; dur+=$10; tx+=$4; wh+=$5; nblk+=1; if($9>0){sched_sum+=$9; sched_n+=1}}
+            NR==2 {t0=$1}
+            {t1=$1}
             END {
-                printf "total_gc_ms=%.0f\ntrace_duration_ms=%.0f\ntx_total=%d\nwarm_hits=%d\nprep_admitted=%d\nprep_deferred=%d\n",
-                       gc, dur, tx, wh, pa, pd
+                gc_per_1000tx = (tx>0 ? gc/tx*1000 : 0)
+                tps = (t1>t0 ? tx/((t1-t0)/1000.0) : 0)
+                sched_avg_us = (sched_n>0 ? sched_sum/sched_n : 0)
+                printf "total_gc_ms=%.0f\ntrace_duration_ms=%.0f\ntx_total=%d\nwarm_hits=%d\navg_tx_per_block=%.3f\ngc_ms_per_1000tx=%.3f\ntx_per_sec=%.3f\nscheduler_overhead_us_avg=%.1f\n",
+                       gc, dur, tx, wh, (nblk>0 ? tx/nblk : 0), gc_per_1000tx, tps, sched_avg_us
             }' "${last_csv}")
         echo "${gc_stats}" > "${run_dir}/gc_summary.txt"
         echo "  LAST log: ${blocks} blocks"
-        echo "  $(grep total_gc_ms "${run_dir}/gc_summary.txt" | head -1)"
-        echo "  $(grep prep_deferred "${run_dir}/gc_summary.txt" | head -1)"
+        cat "${run_dir}/gc_summary.txt" | sed 's/^/  /'
     fi
 
     local measure_line; measure_line=$(grep "| measure " "${run_dir}/caliper_console.log" | tail -1 || true)
@@ -193,47 +217,56 @@ ${NO_LASS}"
 
 # ── Provenance ────────────────────────────────────────────────────────────────
 cat > "${RESULTS_DIR}/provenance.txt" <<EOF
-PREP Evaluation — Besu 4 GB / 150 TPS / 5 variants × 5 reps
+LASTScheduler.reorder() Performance-Fix Validation — Besu 4 GB / 150 TPS
 =============================================================
 Run ID: ${RUN_ID}
 Date:   $(date)
 Host:   $(hostname)
-Binary: ${BESU_BIN}
+Binary: ${BESU_BIN} (FIXED jar, isolated install, canonical unpatched
+        install at ~/besu-mats untouched -- compute23's theta_p sweep
+        still uses the original scheduler)
 Heap:   -Xms4g -Xmx4g (G1GC, MaxGCPauseMillis=200)
 Variants: DISABLED, HYBRID_FEE_LOCALITY(0.5/0.5), MATS, PREP, PREP_SCHED
+n=${REPLICATIONS} each (quick validation, not a publication-grade sample --
+   scale to n=5 afterward only if this confirms the fix helps)
 Load:     150 TPS, 30 contracts × 200 slots, 120s warmup + 300s measure
-PREP gate: θ_p=0.20, θ̄=0.05, Δ=0.30, f_c=0.25, τ=3
-PREP_SCHED: β' = min(β+0.30, 0.95)
+theta_p: default 0.20 (gate inactive on Besu, unchanged from canonical)
+
+Canonical (pre-fix, n=5) reference values:
+  Baseline:   34.0 tx/s,  270.8 tx/block, 66.6 ms/1000tx
+  HFL:        14.6 tx/s,   40.6 tx/block, 27.8 ms/1000tx
+  MATS:       14.7 tx/s,   42.4 tx/block, 26.9 ms/1000tx
+  PREP:       19.5 tx/s,   38.4 tx/block, 26.3 ms/1000tx
+  PREP_SCHED: 17.8 tx/s,   40.3 tx/block, 26.7 ms/1000tx
 EOF
 
-# ── Main loop ─────────────────────────────────────────────────────────────────
+# ── Main loop (all 5 variants, n=1) ─────────────────────────────────────────────
+TOTAL_RUNS=5
 echo "======================================================================"
-echo "PREP Eval Besu | 150 TPS | 120s+300s | 5 variants × 5 reps (interleaved)"
+echo "Scheduler fix validation [compute24] | 150 TPS | 120s+300s | ${TOTAL_RUNS} runs"
 echo "Run ID: ${RUN_ID}"
 echo "Results: ${RESULTS_DIR}"
 echo "======================================================================"
-echo "Starting 25 runs..."
 
-for rep in $(seq 1 ${REPLICATIONS}); do
-    echo ""
-    echo "══════════════════════════════════════════════════════════════════"
-    echo "REPLICATION ${rep}/${REPLICATIONS}"
-    echo "══════════════════════════════════════════════════════════════════"
-
-    run_single "baseline"   ${rep} "-Dlast.variant=DISABLED" || true
-    run_single "last_hfl"   ${rep} "-Dlast.variant=HYBRID_FEE_LOCALITY" "-Dlast.alpha=0.5 -Dlast.beta=0.5" || true
-    run_single "mats"       ${rep} "-Dlast.variant=MATS" || true
-    run_single "prep"       ${rep} "-Dlast.variant=PREP" || true
-    run_single "prep_sched" ${rep} "-Dlast.variant=PREP_SCHED" || true
-
-    if [ ${rep} -lt ${REPLICATIONS} ]; then
-        echo "  (inter-rep cooldown ${INTER_REP_COOLDOWN}s)"
-        sleep ${INTER_REP_COOLDOWN}
-    fi
-done
+run_single "baseline"   1 "-Dlast.variant=DISABLED" || true
+run_single "last_hfl"   1 "-Dlast.variant=HYBRID_FEE_LOCALITY" "-Dlast.alpha=0.5 -Dlast.beta=0.5" || true
+run_single "mats"       1 "-Dlast.variant=MATS" || true
+run_single "prep"       1 "-Dlast.variant=PREP" || true
+run_single "prep_sched" 1 "-Dlast.variant=PREP_SCHED" || true
 
 echo ""
 echo "======================================================================"
-echo "All 25 runs complete."
+echo "Scheduler fix validation: all ${TOTAL_RUNS} runs complete."
 echo "Results: ${RESULTS_DIR}"
 echo "======================================================================"
+echo ""
+echo "Summary vs canonical (pre-fix):"
+for v in baseline last_hfl mats prep prep_sched; do
+    f="${RESULTS_DIR}/${v}_1/gc_summary.txt"
+    echo "  ${v}:"
+    if [ -f "${f}" ]; then
+        cat "${f}" | sed 's/^/    /'
+    else
+        echo "    NO SUMMARY (failed, check ${RESULTS_DIR}/${v}_1/)"
+    fi
+done

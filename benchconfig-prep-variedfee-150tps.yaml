@@ -1,0 +1,31 @@
+test:
+  name: prep-variedfee-150tps
+  description: PREP NM eval @ 150 TPS with per-tx gasPrice variation (elapsed-ms + workerIndex) to prevent TxPool tie-lock. 120s warmup + 300s measure, 30 workers, 30 contracts.
+  workers:
+    type: local
+    number: 30
+  rounds:
+    - label: warmup
+      txDuration: 120
+      rateControl:
+        type: fixed-rate
+        opts:
+          tps: 150
+      workload:
+        module: benchmarks/stateBloatVariedFee.js
+        arguments:
+          slotsPerTx: 200
+          numContracts: 30
+          contractPrefix: SB
+    - label: measure
+      txDuration: 300
+      rateControl:
+        type: fixed-rate
+        opts:
+          tps: 150
+      workload:
+        module: benchmarks/stateBloatVariedFee.js
+        arguments:
+          slotsPerTx: 200
+          numContracts: 30
+          contractPrefix: SB

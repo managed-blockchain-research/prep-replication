@@ -1,6 +1,31 @@
 #!/bin/bash
 # ============================================================
-# PREP Evaluation Harness — Nethermind @ no heap limit
+# PREP Evaluation Harness v2 — Nethermind @ no heap limit
+#
+# Re-run of run_prep_eval.sh (2026-05-15 dataset) after fixing 4 real bugs found
+# while diagnosing why every rep in that dataset showed 0% Caliper-confirmed
+# success and a trace_duration_s ranging 200-1470s (see AGENTS.md items 8-12,
+# 15-16 for full detail; feedback_caliper_harness_debugging_patterns.md memory):
+#   1. GC-trace window now stopped on a fixed wall-clock timer, not tied to
+#      Caliper's own (treatment-dependent) exit time.
+#   2. gasPrice now varies per-tx (benchmarks/stateBloatVariedFee.js) so
+#      Nethermind's TxPool can't tie-lock permanently once full.
+#   3. 3 independent Caliper/web3.js timeouts aligned (networkconfig_nethermind_prep.json):
+#      txWallClockTimeout 8s→300s, transactionPollingTimeout 90s→280s,
+#      transactionBlockTimeout 200→2000 blocks.
+#   4. `wait "$caliper_pid"` under set -e no longer silently aborts the script
+#      (and skips all cleanup) when the internal CALIPER_TIMEOUT actually fires.
+#
+# A fire-and-forget dispatch variant (benchmarks/stateBloatFireAndForget.js) was
+# also tried, but Little's Law makes it structurally unable to sustain 150 TPS
+# once per-tx confirmation latency runs into the hundreds of seconds under
+# backlog (would need ~tens of thousands of concurrent in-flight slots) — so
+# this script deliberately uses the simpler synchronous-dispatch workload.
+# Caliper's own Succ/Fail/latency numbers are NOT reliable at this load level
+# for this workload (same conclusion as RACE's paper) — do not report them.
+# The trustworthy sources are last_metrics.csv (admission/warm-hit/tx_count,
+# NM's own LAST-scheduler log) and gc_summary.txt (dotnet-trace, now on a fixed
+# comparable window).
 #
 # 5 variants × 5 replications = 25 runs, interleaved per rep
 #   baseline   : NETHERMIND_LAST_MODE=DISABLED    (FIFO)
@@ -25,8 +50,8 @@ DT_BIN="${HOME}/.dotnet/tools/dotnet-trace"
 GC_PARSER="/home/yeochan.yoon/caliper-stress-test/gc-collector/publish/NettraceGcParser.dll"
 
 NM_CFG="/home/yeochan.yoon/caliper-stress-test/nethermind-caliper-config/caliper_nethdev_cfg.json"
-BENCHCONFIG="benchconfig-last-vs-lass-nm.yaml"
-NETWORKCONFIG="networkconfig_nethermind_caliper.json"
+BENCHCONFIG="benchconfig-prep-variedfee-150tps.yaml"
+NETWORKCONFIG="networkconfig_nethermind_prep.json"
 DEPLOY_SCRIPT="deploy_multi_contracts_nm.js"
 
 REPLICATIONS=5
@@ -45,7 +70,13 @@ LOAD_DURATION_S=420
 TRACE_BUFFER_S=10
 TRACE_WINDOW_S=$((LOAD_DURATION_S + TRACE_BUFFER_S))
 
-RUN_ID=$(date +%Y%m%d_%H%M%S)_prep_eval
+# RESUME of RUN_ID 20260826_175229_prep_eval_v2 — 6 reps confirmed clean
+# (baseline_1, last_hfl_1, mats_1, prep_1, prep_sched_1, baseline_2), 3 reps
+# found compromised by the zombie-worker bug (item 17/AGENTS.md) and deleted
+# (last_hfl_2, mats_2, prep_2), reps 3-5 never started. This resume reuses the
+# SAME RESULTS_DIR/RUN_ID and only runs what's missing, so the final dataset
+# lives in one directory instead of being split across two RUN_IDs.
+RUN_ID="20260826_175229_prep_eval_v2"
 RESULTS_DIR="/home/yeochan.yoon/caliper-stress-test/results/prep_eval/${RUN_ID}"
 mkdir -p "${RESULTS_DIR}"
 
@@ -107,6 +138,14 @@ run_single() {
     echo "RUN: ${label} | mode=${last_mode} | $(date '+%Y-%m-%d %H:%M:%S')"
     echo "────────────────────────────────────────────────────────────────"
 
+    # `timeout N npx caliper launch manager` does not reliably propagate its kill
+    # signal down through npm exec -> node manager -> node worker children when N
+    # actually fires, orphaning the 30 worker processes instead of reaping them.
+    # Confirmed 2026-08-26: a leaked round's 30 workers kept hammering :8545
+    # alongside the NEXT round's own 30 (2x load), causing that round to collapse.
+    # Explicit cleanup here (and again right after each round ends, below) closes
+    # the window regardless of which layer failed to propagate the signal.
+    pkill -9 -f "caliper launch" 2>/dev/null || true
     pkill -9 -f "nethermind.dll" 2>/dev/null || true
     fuser -k 8545/tcp 8546/tcp 2>/dev/null || true
     sleep 5
@@ -207,6 +246,13 @@ run_single() {
     local t_end
     t_end=$(date +%s)
     echo "  Caliper exit: ${caliper_exit}. Elapsed: $((t_end - t_start))s"
+
+    # Reap any orphaned worker processes now, not just at the top of the next
+    # run_single() call — closes the window during which a leaked round's
+    # workers could still be hammering :8545 before the next round even starts.
+    if [ "${caliper_exit}" != "0" ]; then
+        pkill -9 -f "caliper launch" 2>/dev/null || true
+    fi
 
     # Ensure trace + its watcher are torn down even if Caliper finished before or long after T0+TRACE_WINDOW_S.
     if [ -n "${dotnet_trace_pid}" ] && kill -0 "${dotnet_trace_pid}" 2>/dev/null; then
@@ -310,12 +356,28 @@ pkill -9 -f "nethermind.dll" 2>/dev/null || true
 fuser -k 8545/tcp 8546/tcp 2>/dev/null || true
 sleep 3
 
-# ── Main loop ─────────────────────────────────────────────────────────────────
+# ── Main loop (resume: skip already-clean labels) ───────────────────────────────
 echo ""
-echo "Starting 25 runs (5 variants × 5 reps, interleaved)..."
+echo "Backfilling — 4 runs missing from the 25 (5 variants × 5 reps, interleaved)..."
 echo ""
 
 VARIANTS=("baseline:DISABLED" "last_hfl:HFL_5_5" "mats:MATS" "prep:PREP" "prep_sched:PREP_SCHED")
+
+# mats_4 was the one isolated collapse in the mats variant (trace_duration_s=53.7s,
+# 602 blocks vs 2902-5152 for its healthy siblings mats_1/2/3/5) -- unlike prep_sched,
+# mats only failed this single rep, so this is a single-target backfill, not a
+# systemic-vulnerability retry.
+RUN_ONLY_LABELS=("mats_4")
+
+is_run_only_label() {
+    local label="$1"
+    for target in "${RUN_ONLY_LABELS[@]}"; do
+        if [ "${label}" = "${target}" ]; then
+            return 0
+        fi
+    done
+    return 1
+}
 
 for rep in $(seq 1 "${REPLICATIONS}"); do
     echo ""
@@ -326,6 +388,10 @@ for rep in $(seq 1 "${REPLICATIONS}"); do
     for var_spec in "${VARIANTS[@]}"; do
         local_variant="${var_spec%%:*}"
         local_mode="${var_spec##*:}"
+        local_label="${local_variant}_${rep}"
+        if ! is_run_only_label "${local_label}"; then
+            continue
+        fi
         run_single "${local_variant}" "${rep}" "${local_mode}" || true
         sleep "${COOLDOWN_BETWEEN_RUNS}"
     done

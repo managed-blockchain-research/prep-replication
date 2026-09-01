@@ -9,6 +9,9 @@
 set -e
 cd /home/yeochan.yoon/caliper-stress-test
 
+export JAVA_HOME="/home/yeochan.yoon/jdk17-portable"
+export PATH="${JAVA_HOME}/bin:${PATH}"
+
 # ── Fixed run identity ─────────────────────────────────────────────────────────
 RESUME_RUN_ID="20260518_074856_prep_eval_besu"
 RESULTS_DIR="/home/yeochan.yoon/caliper-stress-test/results/prep_eval_besu/${RESUME_RUN_ID}"

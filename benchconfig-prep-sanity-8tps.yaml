@@ -1,0 +1,31 @@
+test:
+  name: prep-sanity-8tps
+  description: PREP NM sanity check at a realistically-achievable throughput (~8 TPS, vs measured NM capacity of ~5 TPS at 1 tx/block) to check whether Caliper Succ becomes non-zero. 30s warmup + 60s measure, 30 workers, 30 contracts.
+  workers:
+    type: local
+    number: 30
+  rounds:
+    - label: warmup
+      txDuration: 30
+      rateControl:
+        type: fixed-rate
+        opts:
+          tps: 8
+      workload:
+        module: benchmarks/stateBloat.js
+        arguments:
+          slotsPerTx: 200
+          numContracts: 30
+          contractPrefix: SB
+    - label: measure
+      txDuration: 60
+      rateControl:
+        type: fixed-rate
+        opts:
+          tps: 8
+      workload:
+        module: benchmarks/stateBloat.js
+        arguments:
+          slotsPerTx: 200
+          numContracts: 30
+          contractPrefix: SB

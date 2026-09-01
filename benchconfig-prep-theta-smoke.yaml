@@ -1,0 +1,31 @@
+test:
+  name: prep-theta-smoke
+  description: Quick smoke check for PREP gate activation at a recalibrated theta_p (Besu/JVM). 60s warmup + 90s measure, 150 TPS, 30 workers, 30 contracts. NOT for reporting GC-pause numbers -- window is too short for steady-state; only used to confirm nonzero prep_deferred telemetry before committing to a full n=5 run at a given theta_p.
+  workers:
+    type: local
+    number: 30
+  rounds:
+    - label: warmup
+      txDuration: 60
+      rateControl:
+        type: fixed-rate
+        opts:
+          tps: 150
+      workload:
+        module: benchmarks/stateBloat.js
+        arguments:
+          slotsPerTx: 200
+          numContracts: 30
+          contractPrefix: SB
+    - label: measure
+      txDuration: 90
+      rateControl:
+        type: fixed-rate
+        opts:
+          tps: 150
+      workload:
+        module: benchmarks/stateBloat.js
+        arguments:
+          slotsPerTx: 200
+          numContracts: 30
+          contractPrefix: SB

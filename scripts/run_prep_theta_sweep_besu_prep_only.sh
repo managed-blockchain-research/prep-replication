@@ -1,22 +1,38 @@
 #!/bin/bash
 # ============================================================
-# PREP Evaluation Harness — Besu @ 4 GB heap
+# PREP theta_p RECALIBRATION SWEEP — Besu @ 4 GB heap
 #
-# 5 variants × 5 replications = 25 runs, interleaved per rep
-#   baseline   : -Dlast.variant=DISABLED         (FIFO)
-#   last_hfl   : -Dlast.variant=HYBRID_FEE_LOCALITY  (α=β=0.5)
-#   mats       : -Dlast.variant=MATS             (adaptive α/β via EWMA JVM pressure)
-#   prep       : -Dlast.variant=PREP             (admission gate, EWMA pressure)
-#   prep_sched : -Dlast.variant=PREP_SCHED       (PREP gate + boosted β)
+# Pre-registered (see debate synthesis at
+# ~/.claude-octopus/debates/local/002-prep-gate-contribution/synthesis.md):
+# the default theta_p=0.20 never activates on Besu because observed JVM
+# EWMA pressure (avg 0.033, max 0.089) never crosses it. This sweep tests
+# theta_p in {0.04, 0.05, 0.07} -- confirmed via smoke test to trigger
+# nonzero prep_deferred at all three -- for PREP and PREP_SCHED only.
+# Baseline/HFL/MATS do not depend on theta_p; one fresh baseline rep is
+# included as a drift check against the canonical n=5 result (5.93 ms/s),
+# not as a new baseline dataset.
 #
-# Interleaved order: b1→hfl1→mats1→prep1→ps1→b2→…
+# Selection criterion (pre-registered, decided BEFORE seeing full results):
+# among theta values where PREP/PREP_SCHED show a statistically detectable
+# GC-pause change vs the canonical theta=0.20 (inactive-gate) result AND
+# avg tx_count/block (utilization proxy) does not collapse >20% relative
+# to baseline, report that theta as the calibrated value; otherwise report
+# the full sweep honestly as "no theta in this grid rescues the gate."
 #
-# Binary: besu-mats (besu-24.1.1 + PREP-patched blockcreation jar)
-# Load:   120s warmup + 300s measure, 150 TPS, 30 workers, 30 contracts
+# Order per rep: baseline(once,rep1 only) → prep@0.04 → prep_sched@0.04 →
+#                prep@0.05 → prep_sched@0.05 → prep@0.07 → prep_sched@0.07
+#
+# Binary: besu-mats (besu-24.1.1 + PREP-patched blockcreation jar,
+#         PREP_PRESSURE_THRESHOLD now reads -Dprep.theta_p, default 0.20)
+# Load:   120s warmup + 300s measure, 150 TPS, 30 workers, 30 contracts (UNCHANGED
+#         from canonical run_prep_eval_besu.sh -- the smoke test's shortened
+#         60s/90s window was for activation-check only, not for these results)
 # TX:     stateBloat 200 slots/tx
 # GC:     JVM G1GC unified log per run + gc_total_delta_ms from LASTMetricsLogger
 # Log:    last.log.path CSV per run (extended schema for PREP/PREP_SCHED)
-# Output: results/prep_eval_besu/<RUN_ID>/
+# Secondary metric: avg tx_count/block (utilization) logged alongside GC pause,
+#         per debate synthesis risk #2 (gate could activate but tank utilization)
+# Output: results/prep_theta_sweep_besu/<RUN_ID>/
 # ============================================================
 set -e
 cd /home/yeochan.yoon/caliper-stress-test
@@ -35,12 +51,16 @@ NEWGEN_FLAGS="-XX:+UnlockExperimentalVMOptions -XX:G1MaxNewSizePercent=90 -XX:G1
 NO_LASS="-Dlass.old.gen.activation.threshold=2.0"
 
 REPLICATIONS=5
+THETA_VALUES="0.04 0.05 0.07"
 COOLDOWN_BETWEEN_RUNS=20
 INTER_REP_COOLDOWN=60
 CALIPER_TIMEOUT=1500
 
-RUN_ID=$(date +%Y%m%d_%H%M%S)_prep_eval_besu
-RESULTS_DIR="/home/yeochan.yoon/caliper-stress-test/results/prep_eval_besu/${RUN_ID}"
+# SPLIT RUN (compute23 half): fixed shared RUN_ID so both halves land in one
+# directory over NFS. This host runs the baseline drift-check + PREP variant
+# only; compute24 runs PREP_SCHED only via run_prep_theta_sweep_besu_prepsched_only.sh.
+RUN_ID="20260828_133000_prep_theta_sweep_besu"
+RESULTS_DIR="/home/yeochan.yoon/caliper-stress-test/results/prep_theta_sweep_besu/${RUN_ID}"
 mkdir -p "${RESULTS_DIR}"
 
 # ── Helpers ───────────────────────────────────────────────────────────────────
@@ -173,15 +193,16 @@ ${NO_LASS}"
         # sum gc_total_delta_ms (col 15) and block_duration_ms (col 10)
         # For PREP/PREP_SCHED: also sum prep_admitted (col 21) and prep_deferred (col 22)
         local gc_stats
-        gc_stats=$(awk -F, 'NR>1 {gc+=$15; dur+=$10; tx+=$4; wh+=$5; pa+=$21; pd+=$22}
+        gc_stats=$(awk -F, 'NR>1 {gc+=$15; dur+=$10; tx+=$4; wh+=$5; pa+=$21; pd+=$22; nblk+=1}
             END {
-                printf "total_gc_ms=%.0f\ntrace_duration_ms=%.0f\ntx_total=%d\nwarm_hits=%d\nprep_admitted=%d\nprep_deferred=%d\n",
-                       gc, dur, tx, wh, pa, pd
+                printf "total_gc_ms=%.0f\ntrace_duration_ms=%.0f\ntx_total=%d\nwarm_hits=%d\nprep_admitted=%d\nprep_deferred=%d\navg_tx_per_block=%.3f\n",
+                       gc, dur, tx, wh, pa, pd, (nblk>0 ? tx/nblk : 0)
             }' "${last_csv}")
         echo "${gc_stats}" > "${run_dir}/gc_summary.txt"
         echo "  LAST log: ${blocks} blocks"
         echo "  $(grep total_gc_ms "${run_dir}/gc_summary.txt" | head -1)"
         echo "  $(grep prep_deferred "${run_dir}/gc_summary.txt" | head -1)"
+        echo "  $(grep avg_tx_per_block "${run_dir}/gc_summary.txt" | head -1) (utilization proxy)"
     fi
 
     local measure_line; measure_line=$(grep "| measure " "${run_dir}/caliper_console.log" | tail -1 || true)
@@ -193,26 +214,39 @@ ${NO_LASS}"
 
 # ── Provenance ────────────────────────────────────────────────────────────────
 cat > "${RESULTS_DIR}/provenance.txt" <<EOF
-PREP Evaluation — Besu 4 GB / 150 TPS / 5 variants × 5 reps
+PREP theta_p Recalibration Sweep — Besu 4 GB / 150 TPS
 =============================================================
 Run ID: ${RUN_ID}
 Date:   $(date)
 Host:   $(hostname)
 Binary: ${BESU_BIN}
 Heap:   -Xms4g -Xmx4g (G1GC, MaxGCPauseMillis=200)
-Variants: DISABLED, HYBRID_FEE_LOCALITY(0.5/0.5), MATS, PREP, PREP_SCHED
-Load:     150 TPS, 30 contracts × 200 slots, 120s warmup + 300s measure
-PREP gate: θ_p=0.20, θ̄=0.05, Δ=0.30, f_c=0.25, τ=3
+Theta values swept: ${THETA_VALUES} (PREP, PREP_SCHED only; n=${REPLICATIONS} each)
+Drift check: 1 fresh baseline rep (canonical n=5 baseline = 5.93 ms/s)
+Load:     150 TPS, 30 contracts × 200 slots, 120s warmup + 300s measure (UNCHANGED from canonical eval)
+PREP gate: θ̄=0.05, Δ=0.30, f_c=0.25, τ=3 (unchanged); θ_p swept per-run via -Dprep.theta_p
 PREP_SCHED: β' = min(β+0.30, 0.95)
+
+Pre-registered selection criterion (decided before seeing full results):
+  report as "calibrated" the theta_p (if any) where PREP/PREP_SCHED show a
+  statistically detectable GC-pause change vs the canonical theta=0.20
+  (gate-inactive) result AND avg_tx_per_block does not collapse >20% vs
+  baseline. If no theta in {0.04, 0.05, 0.07} satisfies this, report the
+  full grid honestly as a null result for gate recalibration.
+
+Smoke test (1 rep, 60s/90s, prior to this run) confirmed nonzero prep_deferred
+at all three theta values: 0.04 -> 5208, 0.05 -> 5476, 0.07 -> 1752 (out of
+~980-998k prep_admitted each, i.e. gate activates only briefly near pressure
+spikes -- consistent with avg EWMA 0.033 rarely exceeding these thresholds).
 EOF
 
-# ── Main loop ─────────────────────────────────────────────────────────────────
+# ── Main loop (compute23 half: baseline drift-check + PREP only) ───────────────
+TOTAL_RUNS=$(( 1 + REPLICATIONS * 3 ))
 echo "======================================================================"
-echo "PREP Eval Besu | 150 TPS | 120s+300s | 5 variants × 5 reps (interleaved)"
+echo "PREP theta_p sweep Besu [compute23/PREP half] | 150 TPS | 120s+300s | ${TOTAL_RUNS} runs"
 echo "Run ID: ${RUN_ID}"
 echo "Results: ${RESULTS_DIR}"
 echo "======================================================================"
-echo "Starting 25 runs..."
 
 for rep in $(seq 1 ${REPLICATIONS}); do
     echo ""
@@ -220,11 +254,13 @@ for rep in $(seq 1 ${REPLICATIONS}); do
     echo "REPLICATION ${rep}/${REPLICATIONS}"
     echo "══════════════════════════════════════════════════════════════════"
 
-    run_single "baseline"   ${rep} "-Dlast.variant=DISABLED" || true
-    run_single "last_hfl"   ${rep} "-Dlast.variant=HYBRID_FEE_LOCALITY" "-Dlast.alpha=0.5 -Dlast.beta=0.5" || true
-    run_single "mats"       ${rep} "-Dlast.variant=MATS" || true
-    run_single "prep"       ${rep} "-Dlast.variant=PREP" || true
-    run_single "prep_sched" ${rep} "-Dlast.variant=PREP_SCHED" || true
+    if [ ${rep} -eq 1 ]; then
+        run_single "baseline_driftcheck" 1 "-Dlast.variant=DISABLED" || true
+    fi
+
+    for theta in ${THETA_VALUES}; do
+        run_single "prep_theta${theta}" ${rep} "-Dlast.variant=PREP" "-Dprep.theta_p=${theta}" || true
+    done
 
     if [ ${rep} -lt ${REPLICATIONS} ]; then
         echo "  (inter-rep cooldown ${INTER_REP_COOLDOWN}s)"
@@ -234,6 +270,19 @@ done
 
 echo ""
 echo "======================================================================"
-echo "All 25 runs complete."
+echo "compute23/PREP half: all ${TOTAL_RUNS} runs complete."
 echo "Results: ${RESULTS_DIR}"
 echo "======================================================================"
+echo ""
+echo "Per-theta deferral + GC summary (PREP):"
+for theta in ${THETA_VALUES}; do
+    echo "  prep_theta${theta}:"
+    for rep in $(seq 1 ${REPLICATIONS}); do
+        f="${RESULTS_DIR}/prep_theta${theta}_${rep}/gc_summary.txt"
+        if [ -f "${f}" ]; then
+            echo "    rep${rep}: $(grep total_gc_ms "$f") $(grep prep_deferred "$f") $(grep avg_tx_per_block "$f")"
+        else
+            echo "    rep${rep}: NO SUMMARY (failed, check ${RESULTS_DIR}/prep_theta${theta}_${rep}/)"
+        fi
+    done
+done
